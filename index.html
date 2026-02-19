@@ -69,7 +69,9 @@ body{
   white-space:nowrap;
 }
 .item-badge{
-  display:inline-block;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
   margin-left:10px;
   font-size:clamp(.78rem,1.8vw,1rem);
   font-weight:700;
@@ -78,6 +80,10 @@ body{
   border-radius:999px;
   padding:5px 10px;
   vertical-align:middle;
+}
+.item-badge-star{
+  font-size:1.4em;
+  line-height:1;
 }
 .footer{
   text-align:center;
@@ -116,7 +122,7 @@ body.preview-open{overflow:hidden}
 
     <div class="category">
       <h2 class="category-title">🥔 Papas y botanas crujientes</h2>
-      <div class="item"><a href="images/pringles-original.png"><img loading="lazy" src="images/pringles-original.png" alt="Pringles Original"></a><div class="item-name">Pringles Original <span class="item-badge">⭐ Most Popular</span></div><div class="item-price">$2.00</div></div>
+      <div class="item"><a href="images/pringles-original.png"><img loading="lazy" src="images/pringles-original.png" alt="Pringles Original"></a><div class="item-name">Pringles Original <span class="item-badge"><span class="item-badge-star">⭐</span>Most Popular</span></div><div class="item-price">$2.00</div></div>
       <div class="item"><a href="images/pringles-sourcream.png"><img loading="lazy" src="images/pringles-sourcream.png" alt="Pringles Sour Cream & Onion"></a><div class="item-name">Pringles Sour Cream & Onion</div><div class="item-price">$2.00</div></div>
       <div class="item"><a href="images/pringles-cheddar.png"><img loading="lazy" src="images/pringles-cheddar.png" alt="Pringles Cheddar Cheese"></a><div class="item-name">Pringles Cheddar Cheese</div><div class="item-price">$2.00</div></div>
     </div>
@@ -127,7 +133,7 @@ body.preview-open{overflow:hidden}
       <div class="item"><a href="images/oreo-chocolate.jpg"><img loading="lazy" src="images/oreo-chocolate.jpg" alt="Oreo Chocolate"></a><div class="item-name">Oreo Chocolate </div><div class="item-price">$2.00</div></div>
       <div class="item"><a href="images/blackforest.png"><img loading="lazy" src="images/blackforest.png" alt="Black Forest Organic Gummy Bears"></a><div class="item-name">Black Forest Organic Gummy Bears</div><div class="item-price">$1.00</div></div>
       <div class="item"><a href="images/kitkat.png"><img loading="lazy" src="images/kitkat.png" alt="KitKat"></a><div class="item-name">KitKat</div><div class="item-price">$2.50</div></div>
-      <div class="item"><a href="images/snickers.png"><img loading="lazy" src="images/snickers.png" alt="Snickers"></a><div class="item-name">Snickers</div><span class="item-badge">⭐ Best</span></div><div class="item-price">$2.50</div></div>
+      <div class="item"><a href="images/snickers.png"><img loading="lazy" src="images/snickers.png" alt="Snickers"></a><div class="item-name">Snickers <span class="item-badge"><span class="item-badge-star">⭐</span>Best</span></div><div class="item-price">$2.50</div></div>
       <div class="item"><a href="images/skittles-original.png"><img loading="lazy" src="images/skittles-original.png" alt="Skittles Original"></a><div class="item-name">Skittles Original</div><div class="item-price">$2.50</div></div>
       <div class="item"><a href="images/skittles-sour.png"><img loading="lazy" src="images/skittles-sour.png" alt="Skittles Sour"></a><div class="item-name">Skittles Sour</div><div class="item-price">$2.50</div></div>
       <div class="item"><a href="images/skittles-wildberry.png"><img loading="lazy" src="images/skittles-wildberry.png" alt="Skittles Wild Berry"></a><div class="item-name">Skittles Wild Berry</div><div class="item-price">$2.50</div></div>
@@ -135,7 +141,7 @@ body.preview-open{overflow:hidden}
 
     <div class="category">
       <h2 class="category-title">💪 Barras de proteína</h2>
-      <div class="item"><a href="images/fitcrunch-peanut.png"><img loading="lazy" src="images/fitcrunch-peanut.png" alt="FitCrunch Peanut Butter"></a><div class="item-name">FitCrunch Peanut Butter</div><span class="item-badge">⭐ Best</span></div><div class="item-price">$3.00</div></div>
+      <div class="item"><a href="images/fitcrunch-peanut.png"><img loading="lazy" src="images/fitcrunch-peanut.png" alt="FitCrunch Peanut Butter"></a><div class="item-name">FitCrunch Peanut Butter <span class="item-badge"><span class="item-badge-star">⭐</span>Best</span></div><div class="item-price">$3.00</div></div>
       <div class="item"><a href="images/fitcrunch-choco.png"><img loading="lazy" src="images/fitcrunch-choco.png" alt="FitCrunch Chocolate Chip"></a><div class="item-name">FitCrunch Chocolate Chip Cookie Dough</div><div class="item-price">$3.00</div></div>
       <div class="item"><a href="images/rxbar-choco.png"><img loading="lazy" src="images/rxbar-choco.png" alt="RXBAR Chocolate Sea Salt"></a><div class="item-name">RXBAR Chocolate Sea Salt</div><div class="item-price">$3.00</div></div>
       <div class="item"><a href="images/quest-cookies.png"><img loading="lazy" src="images/quest-cookies.png" alt="Quest Cookies & Cream"></a><div class="item-name">Quest Cookies & Cream</div><div class="item-price">$3.00</div></div>
@@ -144,7 +150,7 @@ body.preview-open{overflow:hidden}
     <div class="category">
       <h2 class="category-title">🥤 Bebidas</h2>
       <div class="item"><a href="images/costco-water.png"><img loading="lazy" src="images/costco-water.png" alt="Agua Costco"></a><div class="item-name">Agua Costco</div><div class="item-price">$1.00</div></div>
-      <div class="item"><a href="images/zero-coke.png"><img loading="lazy" src="images/zero-coke.png" alt="Coca-Cola Zero"></a><div class="item-name">Coca-Cola Zero</div><span class="item-badge">⭐ Best</span></div><div class="item-price">$2.50</div></div>
+      <div class="item"><a href="images/zero-coke.png"><img loading="lazy" src="images/zero-coke.png" alt="Coca-Cola Zero"></a><div class="item-name">Coca-Cola Zero <span class="item-badge"><span class="item-badge-star">⭐</span>Best</span></div><div class="item-price">$2.50</div></div>
       <div class="item"><a href="images/starbucks-espresso.png"><img loading="lazy" src="images/starbucks-espresso.png" alt="Starbucks Espresso"></a><div class="item-name">Starbucks Espresso</div><div class="item-price">$5.00</div></div>
     </div>
 
