@@ -43,7 +43,7 @@ body{
 }
 .item{
   display:grid;
-  grid-template-columns:minmax(84px,12vw) 1fr auto;
+  grid-template-columns:minmax(84px,12vw) 1fr auto auto;
   align-items:center;
   gap:clamp(10px,2.5vw,18px);
   padding:clamp(10px,2.2vw,18px);
@@ -101,6 +101,216 @@ body.preview-open{overflow:hidden}
   .item{grid-template-columns:72px 1fr auto;gap:10px;padding:10px}
   .item img{width:64px}
 }
+/* ===== Add (+) button on each item ===== */
+.item{
+  position: relative; /* 为右侧按钮定位 */
+  padding-right: 64px; /* 给右侧➕留空间 */
+}
+
+/* ===== Inline Quantity Stepper ===== */
+
+
+
+.qty-control{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.qty-btn{
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand), #ff9f7f);
+  box-shadow: 0 8px 18px rgba(255,126,95,.25);
+}
+
+.qty-btn.minus{
+  background: #374151;
+}
+
+.qty-number{
+  min-width: 24px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 15px;
+}
+
+/* ===== Bottom sell bar ===== */
+:root{ --sellBarH: 92px; }
+
+.content{
+  padding-bottom: calc(clamp(16px,4vw,32px) + var(--sellBarH));
+}
+
+.sell-bar{
+  position: sticky;
+  bottom: 0;
+  z-index: 9;
+  width: 100%;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #eee;
+}
+
+.sell-bar-inner{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px clamp(14px,4vw,30px);
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.sell-summary-title{
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+.sell-summary-sub{
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.sell-submit{
+  justify-self: center;
+  min-width: 140px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: .2px;
+  background: linear-gradient(135deg, var(--brand), #ff9f7f);
+  box-shadow: 0 14px 30px rgba(255,126,95,.30);
+}
+
+.sell-submit:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.sell-clear{
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  padding: 12px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.sell-clear:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* 小屏适配 */
+@media (max-width:640px){
+  :root{ --sellBarH: 104px; }
+  .sell-submit{ min-width: 120px; }
+  .item{ padding-right: 58px; }
+  .add-btn{ width: 40px; height: 40px; right: 10px; }
+}
+.cart-drawer{
+  position:fixed;
+  inset:0;
+  display:none;
+  background:rgba(0,0,0,.3);
+  z-index:30;
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+.cart-drawer.open{
+  display:block;
+  opacity: 1;
+}
+.cart-panel{
+  position:absolute;
+  right:0;
+  top:0;
+  height:100%;
+  width: min(360px, 92vw);
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(10px);
+  box-shadow:-10px 0 30px rgba(0,0,0,.2);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+
+  transform: translateX(102%);
+  transition: transform .22s cubic-bezier(.2,.9,.2,1);
+}
+
+.cart-drawer.open .cart-panel{
+  transform: translateX(0);
+}
+/* 可选：关闭按钮更好点 */
+#cartClose{
+  border:none;
+  background:#fff;
+  width:36px;
+  height:36px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:22px;
+  line-height:1;
+}
+
+.cart-header{
+  display:flex;
+  justify-content:space-between;
+  font-weight:900;
+  margin-bottom:10px;
+}
+
+.cart-items{
+  flex:1;
+  overflow:auto;
+  font-size:14px;
+}
+
+.cart-footer{
+  font-weight:900;
+  margin-top:10px;
+}
+.cart-item-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+  padding-bottom:10px;
+  border-bottom:1px solid #f1f1f1;
+}
+
+.cart-item-img{
+  width:60px;
+  height:60px;
+  object-fit:contain;
+  border-radius:8px;
+  background:#fff;
+}
+
+.cart-item-qty{
+  font-weight:900;
+  font-size:16px;
+}
+#cartTotalPrice{
+  margin-top:6px;
+  font-weight: 900;
+  font-size: 18px;
+  color: #111827;
+}
 </style>
 </head>
 <body>
@@ -113,50 +323,50 @@ body.preview-open{overflow:hidden}
   <div class="content">
     <div class="category">
       <h2 class="category-title">🍪 Galletas y dulces horneados</h2>
-      <div class="item"><a href="images/nilla.jpg"><img loading="lazy" src="images/nilla.jpg" alt="Mini Nilla Wafers"></a><div class="item-name">Mini Nilla Wafers</div><div class="item-price">$1.00</div></div>
-      <div class="item"><a href="images/chipsahoy.jpg"><img loading="lazy" src="images/chipsahoy.jpg" alt="Mini Chips Ahoy"></a><div class="item-name">Mini Chips Ahoy</div><div class="item-price">$1.00</div></div>
-      <div class="item"><a href="images/nutterbutter.jpg"><img loading="lazy" src="images/nutterbutter.jpg" alt="Nutter Butter Bites"></a><div class="item-name">Nutter Butter Bites</div><div class="item-price">$1.00</div></div>
-      <div class="item"><a href="images/ritz.png"><img loading="lazy" src="images/ritz.png" alt="Ritz Bits Cheese"></a><div class="item-name">Ritz Bits Cheese</div><div class="item-price">$1.00</div></div>
+      <div class="item" data-sku="001"><a href="images/nilla.jpg"><img loading="lazy" src="images/nilla.jpg" alt="Mini Nilla Wafers"></a><div class="item-name">Mini Nilla Wafers</div><div class="item-price">$1.00</div></div>
+      <div class="item" data-sku="002"><a href="images/chipsahoy.jpg"><img loading="lazy" src="images/chipsahoy.jpg" alt="Mini Chips Ahoy"></a><div class="item-name">Mini Chips Ahoy</div><div class="item-price">$1.00</div></div>
+      <div class="item" data-sku="003"><a href="images/nutterbutter.jpg"><img loading="lazy" src="images/nutterbutter.jpg" alt="Nutter Butter Bites"></a><div class="item-name">Nutter Butter Bites</div><div class="item-price">$1.00</div></div>
+      <div class="item" data-sku="004"><a href="images/ritz.png"><img loading="lazy" src="images/ritz.png" alt="Ritz Bits Cheese"></a><div class="item-name">Ritz Bits Cheese</div><div class="item-price">$1.00</div></div>
     </div>
 
 
     <div class="category">
       <h2 class="category-title">🥔 Papas y botanas crujientes</h2>
-      <div class="item"><a href="images/pringles-original.png"><img loading="lazy" src="images/pringles-original.png" alt="Pringles Original"></a><div class="item-name">Pringles Original <span class="item-badge"><span class="item-badge-star">⭐</span>Most Popular</span></div><div class="item-price">$2.00</div></div>
-      <div class="item"><a href="images/pringles-sourcream.png"><img loading="lazy" src="images/pringles-sourcream.png" alt="Pringles Sour Cream & Onion"></a><div class="item-name">Pringles Sour Cream & Onion</div><div class="item-price">$2.00</div></div>
-      <div class="item"><a href="images/pringles-cheddar.png"><img loading="lazy" src="images/pringles-cheddar.png" alt="Pringles Cheddar Cheese"></a><div class="item-name">Pringles Cheddar Cheese</div><div class="item-price">$2.00</div></div>
+      <div class="item" data-sku="005"><a href="images/pringles-original.png"><img loading="lazy" src="images/pringles-original.png" alt="Pringles Original"></a><div class="item-name">Pringles Original <span class="item-badge"><span class="item-badge-star">⭐</span>Most Popular</span></div><div class="item-price">$2.00</div></div>
+      <div class="item" data-sku="006"><a href="images/pringles-sourcream.png"><img loading="lazy" src="images/pringles-sourcream.png" alt="Pringles Sour Cream & Onion"></a><div class="item-name">Pringles Sour Cream & Onion</div><div class="item-price">$2.00</div></div>
+      <div class="item" data-sku="007"><a href="images/pringles-cheddar.png"><img loading="lazy" src="images/pringles-cheddar.png" alt="Pringles Cheddar Cheese"></a><div class="item-name">Pringles Cheddar Cheese</div><div class="item-price">$2.00</div></div>
     </div>
 
     <div class="category">
       <h2 class="category-title">🍬 Dulces y chocolates</h2>
-      <div class="item"><a href="images/oreomini.jpg"><img loading="lazy" src="images/oreomini.jpg" alt="Oreo Mini Cookies"></a><div class="item-name">Oreo Mini Cookies</div><div class="item-price">$1.00</div></div>
-      <div class="item"><a href="images/oreo-chocolate.jpg"><img loading="lazy" src="images/oreo-chocolate.jpg" alt="Oreo Chocolate"></a><div class="item-name">Oreo Chocolate </div><div class="item-price">$2.00</div></div>
-      <div class="item"><a href="images/blackforest.png"><img loading="lazy" src="images/blackforest.png" alt="Black Forest Organic Gummy Bears"></a><div class="item-name">Black Forest Organic Gummy Bears</div><div class="item-price">$1.00</div></div>
-      <div class="item"><a href="images/kitkat.png"><img loading="lazy" src="images/kitkat.png" alt="KitKat"></a><div class="item-name">KitKat</div><div class="item-price">$2.50</div></div>
-      <div class="item"><a href="images/snickers.png"><img loading="lazy" src="images/snickers.png" alt="Snickers"></a><div class="item-name">Snickers <span class="item-badge"><span class="item-badge-star">⭐</span>Best</span></div><div class="item-price">$2.50</div></div>
-      <div class="item"><a href="images/skittles-original.png"><img loading="lazy" src="images/skittles-original.png" alt="Skittles Original"></a><div class="item-name">Skittles Original</div><div class="item-price">$2.50</div></div>
-      <div class="item"><a href="images/skittles-sour.png"><img loading="lazy" src="images/skittles-sour.png" alt="Skittles Sour"></a><div class="item-name">Skittles Sour</div><div class="item-price">$2.50</div></div>
-      <div class="item"><a href="images/skittles-wildberry.png"><img loading="lazy" src="images/skittles-wildberry.png" alt="Skittles Wild Berry"></a><div class="item-name">Skittles Wild Berry</div><div class="item-price">$2.50</div></div>
+      <div class="item" data-sku="008"><a href="images/oreomini.jpg"><img loading="lazy" src="images/oreomini.jpg" alt="Oreo Mini Cookies"></a><div class="item-name">Oreo Mini Cookies</div><div class="item-price">$1.00</div></div>
+      <div class="item" data-sku="009"><a href="images/oreo-chocolate.jpg"><img loading="lazy" src="images/oreo-chocolate.jpg" alt="Oreo Chocolate"></a><div class="item-name">Oreo Chocolate </div><div class="item-price">$2.00</div></div>
+      <div class="item" data-sku="010"><a href="images/blackforest.png"><img loading="lazy" src="images/blackforest.png" alt="Black Forest Organic Gummy Bears"></a><div class="item-name">Black Forest Organic Gummy Bears</div><div class="item-price">$1.00</div></div>
+      <div class="item" data-sku="011"><a href="images/kitkat.png"><img loading="lazy" src="images/kitkat.png" alt="KitKat"></a><div class="item-name">KitKat</div><div class="item-price">$2.50</div></div>
+      <div class="item" data-sku="012"><a href="images/snickers.png"><img loading="lazy" src="images/snickers.png" alt="Snickers"></a><div class="item-name">Snickers <span class="item-badge"><span class="item-badge-star">⭐</span>Best</span></div><div class="item-price">$2.50</div></div>
+      <div class="item" data-sku= "013"><a href= "images/skittles-original.png"><img loading= "lazy" src= "images/skittles-original.png" alt= "Skittles Original"></a><div class= "item-name">Skittles Original</div><div class= "item-price">$2.50</div></div>
+      <div class="item" data-sku="014"><a href="images/skittles-sour.png"><img loading="lazy" src="images/skittles-sour.png" alt="Skittles Sour"></a><div class="item-name">Skittles Sour</div><div class="item-price">$2.50</div></div>
+      <div class="item" data-sku="015"><a href="images/skittles-wildberry.png"><img loading="lazy" src="images/skittles-wildberry.png" alt="Skittles Wild Berry"></a><div class="item-name">Skittles Wild Berry</div><div class="item-price">$2.50</div></div>
     </div>
 
     <div class="category">
       <h2 class="category-title">💪 Barras de proteína</h2>
-      <div class="item"><a href="images/rxbar-choco.png"><img loading="lazy" src="images/rxbar-choco.png" alt="RXBAR Chocolate Sea Salt"></a><div class="item-name">RXBAR Chocolate Sea Salt</div><div class="item-price">$3.00</div></div>
+      <div class="item" data-sku="023"><a href="images/rxbar-choco.png"><img loading="lazy" src="images/rxbar-choco.png" alt="RXBAR Chocolate Sea Salt"></a><div class="item-name">RXBAR Chocolate Sea Salt</div><div class="item-price">$3.00</div></div>
     </div>
 
     <div class="category">
       <h2 class="category-title">🥤 Bebidas</h2>
-      <div class="item"><a href="images/costco-water.png"><img loading="lazy" src="images/costco-water.png" alt="Agua Costco"></a><div class="item-name">Agua Costco</div><div class="item-price">$1.00</div></div>
-      <div class="item"><a href="images/zero-coke.png"><img loading="lazy" src="images/zero-coke.png" alt="Coca-Cola Zero"></a><div class="item-name">Coca-Cola Zero <span class="item-badge"><span class="item-badge-star">⭐</span>Best</span></div><div class="item-price">$2.50</div></div>
-      <div class="item"><a href="images/coca-cola-classic.png"><img loading="lazy" src="images/coca-cola-classic.png" alt="Coca-Cola Classic"></a><div class="item-name">Coca-Cola Classic</div><div class="item-price">$2.50</div></div>
-      <div class="item"><a href="images/starbucks-espresso.png"><img loading="lazy" src="images/starbucks-espresso.png" alt="Starbucks Espresso"></a><div class="item-name">Starbucks Espresso</div><div class="item-price">$5.00</div></div>
+      <div class="item" data-sku="016"><a href="images/costco-water.png"><img loading="lazy" src="images/costco-water.png" alt="Agua Costco"></a><div class="item-name">Agua Costco</div><div class="item-price">$1.00</div></div>
+      <div class="item" data-sku="017"><a href="images/zero-coke.png"><img loading="lazy" src="images/zero-coke.png" alt="Coca-Cola Zero"></a><div class="item-name">Coca-Cola Zero <span class="item-badge"><span class="item-badge-star">⭐</span>Best</span></div><div class="item-price">$2.50</div></div>
+      <div class="item" data-sku="018"><a href="images/coca-cola-classic.png"><img loading="lazy" src="images/coca-cola-classic.png" alt="Coca-Cola Classic"></a><div class="item-name">Coca-Cola Classic</div><div class="item-price">$2.50</div></div>
+      <div class="item" data-sku= "019"><a href= "images/starbucks-espresso.png"><img loading= "lazy" src= "images/starbucks-espresso.png" alt= "Starbucks Espresso"></a><div class= "item-name">Starbucks Espresso</div><div class= "item-price">$5.00</div></div>
     </div>
 
     <div class="category">
       <h2 class="category-title">🍃 Chicles</h2>
-      <div class="item"><a href="images/trident-spearmint.png"><img loading="lazy" src="images/trident-spearmint.png" alt="Trident Spearmint"></a><div class="item-name">Trident Spearmint</div><div class="item-price">$2.50</div></div>
-      <div class="item"><a href="images/trident-original.png"><img loading="lazy" src="images/trident-original.png" alt="Trident Original"></a><div class="item-name">Trident Original</div><div class="item-price">$2.50</div></div>
-      <div class="item"><a href="images/trident-mintbliss.png"><img loading="lazy" src="images/trident-mintbliss.png" alt="Trident Mint Bliss"></a><div class="item-name">Trident Mint Bliss</div><div class="item-price">$2.50</div></div>
+      <div class="item" data-sku="020"><a href="images/trident-spearmint.png"><img loading="lazy" src="images/trident-spearmint.png" alt="Trident Spearmint"></a><div class="item-name">Trident Spearmint</div><div class="item-price">$2.50</div></div>
+      <div class="item" data-sku="021"><a href="images/trident-original.png"><img loading="lazy" src="images/trident-original.png" alt="Trident Original"></a><div class="item-name">Trident Original</div><div class="item-price">$2.50</div></div>
+      <div class="item" data-sku="022"><a href="images/trident-mintbliss.png"><img loading="lazy" src="images/trident-mintbliss.png" alt="Trident Mint Bliss"></a><div class="item-name">Trident Mint Bliss</div><div class="item-price">$2.50</div></div>
     </div>
   </div>
 
@@ -167,7 +377,40 @@ body.preview-open{overflow:hidden}
     </div>
   </div>
 
+
   <div class="footer">Inventario fresco · Listo para llevar</div>
+ <!-- Bottom Sell Bar -->
+ <div id="cartDrawer" class="cart-drawer">
+  <div class="cart-panel">
+    <div class="cart-header">
+      <div>Cart Preview</div>
+      <button id="cartClose">×</button>
+    </div>
+
+    <div id="cartItems" class="cart-items"></div>
+
+    <div class="cart-footer">
+      <div id="cartTotal"></div>
+      <div id="cartTotalPrice"></div>
+    </div>
+  </div>
+ </div>
+ <div class="sell-bar" role="region" aria-label="Sell bar">
+  <div class="sell-bar-inner">
+    <div class="sell-summary">
+      <div class="sell-summary-title">Cart</div>
+      <div class="sell-summary-sub" id="sellSummaryText">No items selected</div>
+    </div>
+
+    <button id="sellSubmit" class="sell-submit" type="button" disabled>
+      Sell
+    </button>
+
+    <button id="clearCart" class="sell-clear" type="button" disabled>
+      Clear
+    </button>
+  </div>
+</div>
 </div>
 
 <script>
@@ -203,6 +446,195 @@ previewClose.addEventListener('click', closePreview);
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && preview.classList.contains('is-open')) closePreview();
 });
+const cartDrawer = document.getElementById("cartDrawer");
+const cartClose = document.getElementById("cartClose");
+const cartItemsEl = document.getElementById("cartItems");
+const cartTotalEl = document.getElementById("cartTotal");
+const cartTotalPriceEl = document.getElementById("cartTotalPrice");
+
+
+document.querySelector(".sell-summary").addEventListener("click",()=>{
+  if(Object.keys(cart).length === 0) return;
+  renderCartPreview();
+  cartDrawer.classList.add("open");
+});
+
+cartClose.addEventListener("click",()=>{
+  cartDrawer.classList.remove("open");
+});
+
+cartDrawer.addEventListener("click",(e)=>{
+  if(e.target === cartDrawer){
+    cartDrawer.classList.remove("open");
+  }
+});
+
+function parsePrice(text){
+  // "$2.50" -> 2.5
+  const n = Number(String(text || "").replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function renderCartPreview(){
+  cartItemsEl.innerHTML = "";
+  let totalQty = 0;
+  let totalPrice = 0;
+
+  Object.keys(cart).forEach(sku=>{
+    const qty = cart[sku];
+    totalQty += qty;
+
+    const item = document.querySelector(`.item[data-sku="${sku}"]`);
+    if (!item) return;
+
+    const imgEl = item.querySelector("img");
+    const priceText = item.querySelector(".item-price")?.textContent || "";
+    const unitPrice = parsePrice(priceText);
+
+    totalPrice += unitPrice * qty;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "cart-item-row";
+
+    wrapper.innerHTML = `
+      <img src="${imgEl?.src || ""}" class="cart-item-img" alt="">
+      <div class="cart-item-qty">× ${qty}</div>
+    `;
+
+    cartItemsEl.appendChild(wrapper);
+  });
+
+  cartTotalEl.textContent = `Total Items: ${totalQty}`;
+  cartTotalPriceEl.textContent = `Total Price: $${totalPrice.toFixed(2)}`;
+}
+</script>
+<script>
+/* ===== SIMPLE CART VERSION ===== */
+
+const API_BASE = "http://127.0.0.1:8000"; // 以后换线上
+
+const cart = {}; // { "001":2 }
+
+const summaryTextEl = document.getElementById("sellSummaryText");
+const sellBtnEl = document.getElementById("sellSubmit");
+const clearBtnEl = document.getElementById("clearCart");
+
+function getQty(sku){
+  return cart[sku] || 0;
+}
+
+function setQty(sku, qty){
+  const q = Math.max(0, qty);
+  if(q === 0) delete cart[sku];
+  else cart[sku] = q;
+  updateUI();
+
+  // 如果 cart drawer 已打开，实时更新 preview
+  if (cartDrawer.classList.contains("open")) renderCartPreview();
+}
+
+function updateUI(){
+  // 更新每个商品右侧
+  document.querySelectorAll(".item[data-sku]").forEach(item=>{
+    const sku = item.dataset.sku;
+    const container = item.querySelector(".qty-control");
+    const qty = getQty(sku);
+
+    if(!container) return;
+
+    if(qty === 0){
+      container.innerHTML = `
+        <button class="qty-btn plus">+</button>
+      `;
+    }else{
+      container.innerHTML = `
+        <button class="qty-btn minus">−</button>
+        <div class="qty-number">${qty}</div>
+        <button class="qty-btn plus">+</button>
+      `;
+    }
+  });
+
+  const totalQty = Object.values(cart).reduce((a,b)=>a+b,0);
+
+  if(totalQty === 0){
+    summaryTextEl.textContent = "No items selected";
+    sellBtnEl.disabled = true;
+    clearBtnEl.disabled = true;
+  }else{
+    summaryTextEl.textContent = `${totalQty} item(s)`;
+    sellBtnEl.disabled = false;
+    clearBtnEl.disabled = false;
+  }
+}
+
+function injectQtyControls(){
+  document.querySelectorAll(".item[data-sku]").forEach(item=>{
+    if(item.querySelector(".qty-control")) return;
+
+    const div = document.createElement("div");
+    div.className = "qty-control";
+    item.appendChild(div);
+  });
+}
+
+/* 只允许点击 + 或 - */
+document.addEventListener("click",(e)=>{
+  const plus = e.target.closest(".qty-btn.plus");
+  const minus = e.target.closest(".qty-btn.minus");
+
+  if(plus){
+    const item = plus.closest(".item");
+    const sku = item.dataset.sku;
+    setQty(sku, getQty(sku) + 1);
+  }
+
+  if(minus){
+    const item = minus.closest(".item");
+    const sku = item.dataset.sku;
+    setQty(sku, getQty(sku) - 1);
+  }
+});
+
+/* Clear */
+clearBtnEl.addEventListener("click",()=>{
+  for(const k in cart) delete cart[k];
+  updateUI();
+});
+
+/* Sell */
+sellBtnEl.addEventListener("click", async ()=>{
+  const skus = Object.keys(cart);
+  if(!skus.length) return;
+
+  sellBtnEl.disabled = true;
+  summaryTextEl.textContent = "Submitting...";
+
+  try{
+    for(const sku of skus){
+      const qty = cart[sku];
+      const request_id = crypto.randomUUID();
+
+      const res = await fetch(`${API_BASE}/api/sales`,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ sku, qty, request_id })
+      });
+
+      if(!res.ok) throw new Error("Failed");
+    }
+
+    summaryTextEl.textContent = "Sold ✓";
+    for(const k in cart) delete cart[k];
+    updateUI();
+  }catch(err){
+    summaryTextEl.textContent = "Sell failed";
+  }
+});
+
+/* 初始化 */
+injectQtyControls();
+updateUI();
 </script>
 </body>
 </html>
