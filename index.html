@@ -396,7 +396,6 @@ body.preview-open{overflow:hidden}
  *  CONFIG
  * ========================= */
 const API_BASE = "https://menu-backend-8s25.onrender.com"; // ✅ 上线后换成 https://你的后端域名（不要结尾 /）
-const API_KEY  = "4f93kKz8LmPq21XyN7uQaBcD"; // ✅ 你现在的 key（注意：GitHub Pages 会暴露它）
 const menuRoot = document.getElementById("menuRoot");
 
 // Excel 使用英文分类
@@ -605,7 +604,6 @@ sellBtnEl.addEventListener("click", async ()=>{
       request_id: crypto.randomUUID(),
       note: ""
     }, {
-      "X-API-Key": API_KEY,
       "X-Sell-Pin": pin
     });
 
@@ -626,6 +624,9 @@ giftBtnEl?.addEventListener("click", async ()=>{
   const skus = Object.keys(cart);
   if(!skus.length) return;
 
+  const pin = prompt("Enter PIN to confirm gift:");
+  if (!pin) return;
+
   giftBtnEl.disabled = true;
   summaryTextEl.textContent = "Submitting gift...";
 
@@ -638,7 +639,7 @@ giftBtnEl?.addEventListener("click", async ()=>{
       loss_type: "GIFT",
       note: ""
     }, {
-      "X-API-Key": API_KEY
+      "X-Sell-Pin": pin
     });
 
     for(const k of Object.keys(cart)) delete cart[k];
