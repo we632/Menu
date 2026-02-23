@@ -502,6 +502,8 @@ const cartClose = document.getElementById("cartClose");
 const cartItemsEl = document.getElementById("cartItems");
 const cartTotalEl = document.getElementById("cartTotal");
 const cartTotalPriceEl = document.getElementById("cartTotalPrice");
+let summaryOverrideText = "";
+let summaryOverrideTimer = null;
 
 /** 点 Cart 才打开 drawer */
 document.querySelector(".sell-summary").addEventListener("click",()=>{
@@ -519,17 +521,35 @@ function updateUI(){
   updateQtyControls();
 
   const totalQty = Object.values(cart).reduce((a,b)=>a+b,0);
+  let defaultSummary = "No items selected";
 
   if(totalQty === 0){
-    summaryTextEl.textContent = "No items selected";
     sellBtnEl.disabled = true;
     clearBtnEl.disabled = true;
     if (giftBtnEl) giftBtnEl.disabled = true;
   }else{
-    summaryTextEl.textContent = `${totalQty} item(s)`;
+    defaultSummary = `${totalQty} item(s)`;
     sellBtnEl.disabled = false;
     clearBtnEl.disabled = false;
     if (giftBtnEl) giftBtnEl.disabled = false;
+  }
+
+  summaryTextEl.textContent = summaryOverrideText || defaultSummary;
+}
+
+function setSummaryOverride(text, durationMs = 0){
+  summaryOverrideText = String(text || "").trim();
+  if (summaryOverrideTimer){
+    clearTimeout(summaryOverrideTimer);
+    summaryOverrideTimer = null;
+  }
+  updateUI();
+  if (durationMs > 0){
+    summaryOverrideTimer = setTimeout(()=>{
+      summaryOverrideText = "";
+      summaryOverrideTimer = null;
+      updateUI();
+    }, durationMs);
   }
 }
 
@@ -596,7 +616,7 @@ sellBtnEl.addEventListener("click", async ()=>{
 
   sellBtnEl.disabled = true;
   clearBtnEl.disabled = true;
-  summaryTextEl.textContent = "Submitting...";
+  setSummaryOverride("Submitting...");
 
   try{
     await postJson(`${API_BASE}/api/sales/batch`, {
@@ -611,10 +631,9 @@ sellBtnEl.addEventListener("click", async ()=>{
     updateUI();
     if (cartDrawer.classList.contains("open")) cartDrawer.classList.remove("open");
 
-    summaryTextEl.textContent = "Sold ✓";
-    setTimeout(()=> summaryTextEl.textContent = "No items selected", 1200);
+    setSummaryOverride("Sold ✓", 1200);
   }catch(err){
-    summaryTextEl.textContent = err?.message || "Sell failed";
+    setSummaryOverride(err?.message || "Sell failed", 3000);
   }finally{
     updateUI();
   }
@@ -628,7 +647,7 @@ giftBtnEl?.addEventListener("click", async ()=>{
   if (!pin) return;
 
   giftBtnEl.disabled = true;
-  summaryTextEl.textContent = "Submitting gift...";
+  setSummaryOverride("Submitting gift...");
 
   try{
     const items = skus.map(sku => ({ sku, qty: cart[sku] }));
@@ -646,10 +665,9 @@ giftBtnEl?.addEventListener("click", async ()=>{
     updateUI();
     if (cartDrawer.classList.contains("open")) cartDrawer.classList.remove("open");
 
-    summaryTextEl.textContent = "Gift recorded ✓";
-    setTimeout(()=> summaryTextEl.textContent = "No items selected", 1200);
+    setSummaryOverride("Gift recorded ✓", 1200);
   }catch(err){
-    summaryTextEl.textContent = err?.message || "Gift failed";
+    setSummaryOverride(err?.message || "Gift failed", 3000);
   }finally{
     updateUI();
   }
