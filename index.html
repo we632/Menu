@@ -395,7 +395,7 @@ body.preview-open{overflow:hidden}
 /** =========================
  *  CONFIG
  * ========================= */
-const API_BASE = "https://menu-backend-8s25.onrender.com/"; // ✅ 上线后换成 https://你的后端域名
+const API_BASE = "https://menu-backend-8s25.onrender.com"; // ✅ 上线后换成 https://你的后端域名
 const API_KEY  = "4f93kKz8LmPq21XyN7uQaBcD"; // ✅ 你现在的 key（注意：GitHub Pages 会暴露它）
 const menuRoot = document.getElementById("menuRoot");
 
@@ -694,9 +694,21 @@ document.addEventListener('keydown', (event) => {
 /** =========================
  *  AUTO RENDER MENU
  * ========================= */
+function apiUrl(path){
+  const normalizedPath = String(path || "").replace(/^\/+/, "");
+  return `${API_BASE}/${normalizedPath}`;
+}
+
 async function loadProducts(){
-  const res = await fetch(`${API_BASE}/api/products`);
-  if (!res.ok) throw new Error("Failed to load products");
+  const res = await fetch(apiUrl("api/products"), {
+    headers: {
+      "X-API-Key": API_KEY
+    }
+  });
+  if (!res.ok){
+    const reason = (await res.text().catch(()=>"")).trim();
+    throw new Error(`Failed to load products (${res.status}${reason ? `: ${reason}` : ""})`);
+  }
   return await res.json(); // [{sku,name,category,sell_price,image_url,badge}]
 }
 
