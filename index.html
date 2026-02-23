@@ -311,6 +311,26 @@ body.preview-open{overflow:hidden}
   font-size: 18px;
   color: #111827;
 }
+.cart-actions{
+  margin-top: 12px;
+  display:flex;
+  gap:10px;
+}
+
+.cart-gift{
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,126,95,.35);
+  background: rgba(255,126,95,.10);
+  color: #b45309;
+  font-weight: 900;
+  cursor: pointer;
+}
+.cart-gift:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+}
 </style>
 </head>
 <body>
@@ -321,53 +341,7 @@ body.preview-open{overflow:hidden}
   </div>
 
   <div class="content">
-    <div class="category">
-      <h2 class="category-title">🍪 Galletas y dulces horneados</h2>
-      <div class="item" data-sku="001"><a href="images/nilla.jpg"><img loading="lazy" src="images/nilla.jpg" alt="Mini Nilla Wafers"></a><div class="item-name">Mini Nilla Wafers</div><div class="item-price">$1.00</div></div>
-      <div class="item" data-sku="002"><a href="images/chipsahoy.jpg"><img loading="lazy" src="images/chipsahoy.jpg" alt="Mini Chips Ahoy"></a><div class="item-name">Mini Chips Ahoy</div><div class="item-price">$1.00</div></div>
-      <div class="item" data-sku="003"><a href="images/nutterbutter.jpg"><img loading="lazy" src="images/nutterbutter.jpg" alt="Nutter Butter Bites"></a><div class="item-name">Nutter Butter Bites</div><div class="item-price">$1.00</div></div>
-      <div class="item" data-sku="004"><a href="images/ritz.png"><img loading="lazy" src="images/ritz.png" alt="Ritz Bits Cheese"></a><div class="item-name">Ritz Bits Cheese</div><div class="item-price">$1.00</div></div>
-    </div>
-
-
-    <div class="category">
-      <h2 class="category-title">🥔 Papas y botanas crujientes</h2>
-      <div class="item" data-sku="005"><a href="images/pringles-original.png"><img loading="lazy" src="images/pringles-original.png" alt="Pringles Original"></a><div class="item-name">Pringles Original <span class="item-badge"><span class="item-badge-star">⭐</span>Most Popular</span></div><div class="item-price">$2.00</div></div>
-      <div class="item" data-sku="006"><a href="images/pringles-sourcream.png"><img loading="lazy" src="images/pringles-sourcream.png" alt="Pringles Sour Cream & Onion"></a><div class="item-name">Pringles Sour Cream & Onion</div><div class="item-price">$2.00</div></div>
-      <div class="item" data-sku="007"><a href="images/pringles-cheddar.png"><img loading="lazy" src="images/pringles-cheddar.png" alt="Pringles Cheddar Cheese"></a><div class="item-name">Pringles Cheddar Cheese</div><div class="item-price">$2.00</div></div>
-    </div>
-
-    <div class="category">
-      <h2 class="category-title">🍬 Dulces y chocolates</h2>
-      <div class="item" data-sku="008"><a href="images/oreomini.jpg"><img loading="lazy" src="images/oreomini.jpg" alt="Oreo Mini Cookies"></a><div class="item-name">Oreo Mini Cookies</div><div class="item-price">$1.00</div></div>
-      <div class="item" data-sku="009"><a href="images/oreo-chocolate.jpg"><img loading="lazy" src="images/oreo-chocolate.jpg" alt="Oreo Chocolate"></a><div class="item-name">Oreo Chocolate </div><div class="item-price">$2.00</div></div>
-      <div class="item" data-sku="010"><a href="images/blackforest.png"><img loading="lazy" src="images/blackforest.png" alt="Black Forest Organic Gummy Bears"></a><div class="item-name">Black Forest Organic Gummy Bears</div><div class="item-price">$1.00</div></div>
-      <div class="item" data-sku="011"><a href="images/kitkat.png"><img loading="lazy" src="images/kitkat.png" alt="KitKat"></a><div class="item-name">KitKat</div><div class="item-price">$2.50</div></div>
-      <div class="item" data-sku="012"><a href="images/snickers.png"><img loading="lazy" src="images/snickers.png" alt="Snickers"></a><div class="item-name">Snickers <span class="item-badge"><span class="item-badge-star">⭐</span>Best</span></div><div class="item-price">$2.50</div></div>
-      <div class="item" data-sku= "013"><a href= "images/skittles-original.png"><img loading= "lazy" src= "images/skittles-original.png" alt= "Skittles Original"></a><div class= "item-name">Skittles Original</div><div class= "item-price">$2.50</div></div>
-      <div class="item" data-sku="014"><a href="images/skittles-sour.png"><img loading="lazy" src="images/skittles-sour.png" alt="Skittles Sour"></a><div class="item-name">Skittles Sour</div><div class="item-price">$2.50</div></div>
-      <div class="item" data-sku="015"><a href="images/skittles-wildberry.png"><img loading="lazy" src="images/skittles-wildberry.png" alt="Skittles Wild Berry"></a><div class="item-name">Skittles Wild Berry</div><div class="item-price">$2.50</div></div>
-    </div>
-
-    <div class="category">
-      <h2 class="category-title">💪 Barras de proteína</h2>
-      <div class="item" data-sku="023"><a href="images/rxbar-choco.png"><img loading="lazy" src="images/rxbar-choco.png" alt="RXBAR Chocolate Sea Salt"></a><div class="item-name">RXBAR Chocolate Sea Salt</div><div class="item-price">$3.00</div></div>
-    </div>
-
-    <div class="category">
-      <h2 class="category-title">🥤 Bebidas</h2>
-      <div class="item" data-sku="016"><a href="images/costco-water.png"><img loading="lazy" src="images/costco-water.png" alt="Agua Costco"></a><div class="item-name">Agua Costco</div><div class="item-price">$1.00</div></div>
-      <div class="item" data-sku="017"><a href="images/zero-coke.png"><img loading="lazy" src="images/zero-coke.png" alt="Coca-Cola Zero"></a><div class="item-name">Coca-Cola Zero <span class="item-badge"><span class="item-badge-star">⭐</span>Best</span></div><div class="item-price">$2.50</div></div>
-      <div class="item" data-sku="018"><a href="images/coca-cola-classic.png"><img loading="lazy" src="images/coca-cola-classic.png" alt="Coca-Cola Classic"></a><div class="item-name">Coca-Cola Classic</div><div class="item-price">$2.50</div></div>
-      <div class="item" data-sku= "019"><a href= "images/starbucks-espresso.png"><img loading= "lazy" src= "images/starbucks-espresso.png" alt= "Starbucks Espresso"></a><div class= "item-name">Starbucks Espresso</div><div class= "item-price">$5.00</div></div>
-    </div>
-
-    <div class="category">
-      <h2 class="category-title">🍃 Chicles</h2>
-      <div class="item" data-sku="020"><a href="images/trident-spearmint.png"><img loading="lazy" src="images/trident-spearmint.png" alt="Trident Spearmint"></a><div class="item-name">Trident Spearmint</div><div class="item-price">$2.50</div></div>
-      <div class="item" data-sku="021"><a href="images/trident-original.png"><img loading="lazy" src="images/trident-original.png" alt="Trident Original"></a><div class="item-name">Trident Original</div><div class="item-price">$2.50</div></div>
-      <div class="item" data-sku="022"><a href="images/trident-mintbliss.png"><img loading="lazy" src="images/trident-mintbliss.png" alt="Trident Mint Bliss"></a><div class="item-name">Trident Mint Bliss</div><div class="item-price">$2.50</div></div>
-    </div>
+    <div id="menuRoot"></div>
   </div>
 
   <div class="image-preview" aria-hidden="true">
@@ -392,6 +366,10 @@ body.preview-open{overflow:hidden}
     <div class="cart-footer">
       <div id="cartTotal"></div>
       <div id="cartTotalPrice"></div>
+
+      <div class="cart-actions">
+        <button id="giftSubmit" class="cart-gift" type="button">Gift</button>
+      </div>
     </div>
   </div>
  </div>
@@ -414,65 +392,146 @@ body.preview-open{overflow:hidden}
 </div>
 
 <script>
-const preview = document.querySelector('.image-preview');
-const previewImage = document.querySelector('.image-preview-img');
-const previewClose = document.querySelector('.image-preview-close');
-const previewLinks = document.querySelectorAll('.item a');
+/** =========================
+ *  CONFIG
+ * ========================= */
+const API_BASE = "http://127.0.0.1:8000"; // ✅ 上线后换成 https://你的后端域名
+const API_KEY  = "4f93kKz8LmPq21XyN7uQaBcD"; // ✅ 你现在的 key（注意：GitHub Pages 会暴露它）
+const menuRoot = document.getElementById("menuRoot");
 
-const closePreview = () => {
-  preview.classList.remove('is-open');
-  preview.setAttribute('aria-hidden', 'true');
-  previewImage.src = '';
-  previewImage.alt = '';
-  document.body.classList.remove('preview-open');
+// Excel 使用英文分类
+const CATEGORY_ORDER = [
+  "Cookies",
+  "Chips",
+  "Candy",
+  "Protein",
+  "Drinks",
+  "Gum",
+];
+
+// 映射：英文 → 西班牙语展示
+const CATEGORY_LABEL = {
+  "Cookies": "🍪 Galletas y dulces horneados",
+  "Chips": "🥔 Papas y botanas crujientes",
+  "Candy": "🍬 Dulces y chocolates",
+  "Protein": "💪 Barras de proteína",
+  "Drinks": "🥤 Bebidas",
+  "Gum": "🍃 Chicles",
 };
 
-previewLinks.forEach((link) => {
-  link.addEventListener('click', (event) => {
-    event.preventDefault();
-    const img = link.querySelector('img');
-    previewImage.src = link.getAttribute('href');
-    previewImage.alt = img ? img.alt : 'Vista previa';
-    preview.classList.add('is-open');
-    preview.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('preview-open');
+function fmtPrice(n){
+  const v = Number(n);
+  return Number.isFinite(v) ? `$${v.toFixed(2)}` : "$0.00";
+}
+
+function escapeHtml(s){
+  return String(s ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#39;");
+}
+
+function parsePrice(text){
+  const n = Number(String(text || "").replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
+/** =========================
+ *  CART + QTY
+ * ========================= */
+const cart = {}; // { sku: qty }
+
+function getQty(sku){ return cart[sku] || 0; }
+
+function setQty(sku, qty){
+  const q = Math.max(0, Math.floor(Number(qty) || 0));
+  if (q === 0) delete cart[sku];
+  else cart[sku] = q;
+
+  updateUI();
+  if (cartDrawer.classList.contains("open")) renderCartPreview();
+}
+
+function updateQtyControls(){
+  document.querySelectorAll(".item[data-sku]").forEach(item=>{
+    const sku = item.dataset.sku;
+    const container = item.querySelector(".qty-control");
+    if (!container) return;
+
+    const qty = getQty(sku);
+    if (qty === 0){
+      container.innerHTML = `<button class="qty-btn plus" type="button">+</button>`;
+    } else {
+      container.innerHTML = `
+        <button class="qty-btn minus" type="button">−</button>
+        <div class="qty-number">${qty}</div>
+        <button class="qty-btn plus" type="button">+</button>
+      `;
+    }
   });
+}
+
+/** 只允许点 + / - 改数量（点别的地方不交互） */
+document.addEventListener("click",(e)=>{
+  const plus = e.target.closest(".qty-btn.plus");
+  const minus = e.target.closest(".qty-btn.minus");
+  if (!plus && !minus) return;
+
+  const item = e.target.closest(".item[data-sku]");
+  if (!item) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const sku = item.dataset.sku;
+  if (plus) setQty(sku, getQty(sku) + 1);
+  if (minus) setQty(sku, getQty(sku) - 1);
 });
 
-preview.addEventListener('click', (event) => {
-  if (event.target === preview) closePreview();
-});
-previewClose.addEventListener('click', closePreview);
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && preview.classList.contains('is-open')) closePreview();
-});
+/** =========================
+ *  Bottom bar + Drawer
+ * ========================= */
+const summaryTextEl = document.getElementById("sellSummaryText");
+const sellBtnEl = document.getElementById("sellSubmit");
+const clearBtnEl = document.getElementById("clearCart");
+const giftBtnEl = document.getElementById("giftSubmit");
+
 const cartDrawer = document.getElementById("cartDrawer");
 const cartClose = document.getElementById("cartClose");
 const cartItemsEl = document.getElementById("cartItems");
 const cartTotalEl = document.getElementById("cartTotal");
 const cartTotalPriceEl = document.getElementById("cartTotalPrice");
 
-
+/** 点 Cart 才打开 drawer */
 document.querySelector(".sell-summary").addEventListener("click",()=>{
   if(Object.keys(cart).length === 0) return;
   renderCartPreview();
   cartDrawer.classList.add("open");
 });
 
-cartClose.addEventListener("click",()=>{
-  cartDrawer.classList.remove("open");
-});
-
+cartClose.addEventListener("click",()=> cartDrawer.classList.remove("open"));
 cartDrawer.addEventListener("click",(e)=>{
-  if(e.target === cartDrawer){
-    cartDrawer.classList.remove("open");
-  }
+  if(e.target === cartDrawer) cartDrawer.classList.remove("open");
 });
 
-function parsePrice(text){
-  // "$2.50" -> 2.5
-  const n = Number(String(text || "").replace(/[^0-9.]/g, ""));
-  return Number.isFinite(n) ? n : 0;
+function updateUI(){
+  updateQtyControls();
+
+  const totalQty = Object.values(cart).reduce((a,b)=>a+b,0);
+
+  if(totalQty === 0){
+    summaryTextEl.textContent = "No items selected";
+    sellBtnEl.disabled = true;
+    clearBtnEl.disabled = true;
+    if (giftBtnEl) giftBtnEl.disabled = true;
+  }else{
+    summaryTextEl.textContent = `${totalQty} item(s)`;
+    sellBtnEl.disabled = false;
+    clearBtnEl.disabled = false;
+    if (giftBtnEl) giftBtnEl.disabled = false;
+  }
 }
 
 function renderCartPreview(){
@@ -490,151 +549,234 @@ function renderCartPreview(){
     const imgEl = item.querySelector("img");
     const priceText = item.querySelector(".item-price")?.textContent || "";
     const unitPrice = parsePrice(priceText);
-
     totalPrice += unitPrice * qty;
 
     const wrapper = document.createElement("div");
     wrapper.className = "cart-item-row";
-
     wrapper.innerHTML = `
       <img src="${imgEl?.src || ""}" class="cart-item-img" alt="">
       <div class="cart-item-qty">× ${qty}</div>
     `;
-
     cartItemsEl.appendChild(wrapper);
   });
 
   cartTotalEl.textContent = `Total Items: ${totalQty}`;
   cartTotalPriceEl.textContent = `Total Price: $${totalPrice.toFixed(2)}`;
 }
-</script>
-<script>
-/* ===== SIMPLE CART VERSION ===== */
 
-const API_BASE = "http://127.0.0.1:8000"; // 以后换线上
-
-const cart = {}; // { "001":2 }
-
-const summaryTextEl = document.getElementById("sellSummaryText");
-const sellBtnEl = document.getElementById("sellSubmit");
-const clearBtnEl = document.getElementById("clearCart");
-
-function getQty(sku){
-  return cart[sku] || 0;
-}
-
-function setQty(sku, qty){
-  const q = Math.max(0, qty);
-  if(q === 0) delete cart[sku];
-  else cart[sku] = q;
-  updateUI();
-
-  // 如果 cart drawer 已打开，实时更新 preview
-  if (cartDrawer.classList.contains("open")) renderCartPreview();
-}
-
-function updateUI(){
-  // 更新每个商品右侧
-  document.querySelectorAll(".item[data-sku]").forEach(item=>{
-    const sku = item.dataset.sku;
-    const container = item.querySelector(".qty-control");
-    const qty = getQty(sku);
-
-    if(!container) return;
-
-    if(qty === 0){
-      container.innerHTML = `
-        <button class="qty-btn plus">+</button>
-      `;
-    }else{
-      container.innerHTML = `
-        <button class="qty-btn minus">−</button>
-        <div class="qty-number">${qty}</div>
-        <button class="qty-btn plus">+</button>
-      `;
-    }
-  });
-
-  const totalQty = Object.values(cart).reduce((a,b)=>a+b,0);
-
-  if(totalQty === 0){
-    summaryTextEl.textContent = "No items selected";
-    sellBtnEl.disabled = true;
-    clearBtnEl.disabled = true;
-  }else{
-    summaryTextEl.textContent = `${totalQty} item(s)`;
-    sellBtnEl.disabled = false;
-    clearBtnEl.disabled = false;
-  }
-}
-
-function injectQtyControls(){
-  document.querySelectorAll(".item[data-sku]").forEach(item=>{
-    if(item.querySelector(".qty-control")) return;
-
-    const div = document.createElement("div");
-    div.className = "qty-control";
-    item.appendChild(div);
-  });
-}
-
-/* 只允许点击 + 或 - */
-document.addEventListener("click",(e)=>{
-  const plus = e.target.closest(".qty-btn.plus");
-  const minus = e.target.closest(".qty-btn.minus");
-
-  if(plus){
-    const item = plus.closest(".item");
-    const sku = item.dataset.sku;
-    setQty(sku, getQty(sku) + 1);
-  }
-
-  if(minus){
-    const item = minus.closest(".item");
-    const sku = item.dataset.sku;
-    setQty(sku, getQty(sku) - 1);
-  }
-});
-
-/* Clear */
+/** Clear */
 clearBtnEl.addEventListener("click",()=>{
-  for(const k in cart) delete cart[k];
+  for(const k of Object.keys(cart)) delete cart[k];
   updateUI();
+  if (cartDrawer.classList.contains("open")) renderCartPreview();
 });
 
-/* Sell */
+/** =========================
+ *  Sell / Gift (Batch)
+ * ========================= */
+async function postJson(url, body, extraHeaders = {}){
+  const res = await fetch(url, {
+    method:"POST",
+    headers: { "Content-Type":"application/json", ...extraHeaders },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(()=> ({}));
+  if(!res.ok) throw new Error(data.detail || "Request failed");
+  return data;
+}
+
 sellBtnEl.addEventListener("click", async ()=>{
   const skus = Object.keys(cart);
   if(!skus.length) return;
 
+  // 如果你后端有 PIN 校验就保留；没有就删掉这 3 行
+  const pin = prompt("Enter PIN to confirm sale:");
+  if (!pin) return;
+
+  const items = skus.map(sku => ({ sku, qty: cart[sku] }));
+
   sellBtnEl.disabled = true;
+  clearBtnEl.disabled = true;
   summaryTextEl.textContent = "Submitting...";
 
   try{
-    for(const sku of skus){
-      const qty = cart[sku];
-      const request_id = crypto.randomUUID();
+    await postJson(`${API_BASE}/api/sales/batch`, {
+      items,
+      request_id: crypto.randomUUID(),
+      note: ""
+    }, {
+      "X-API-Key": API_KEY,
+      "X-Sell-Pin": pin
+    });
 
-      const res = await fetch(`${API_BASE}/api/sales`,{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ sku, qty, request_id })
-      });
-
-      if(!res.ok) throw new Error("Failed");
-    }
+    for(const k of Object.keys(cart)) delete cart[k];
+    updateUI();
+    if (cartDrawer.classList.contains("open")) cartDrawer.classList.remove("open");
 
     summaryTextEl.textContent = "Sold ✓";
-    for(const k in cart) delete cart[k];
-    updateUI();
+    setTimeout(()=> summaryTextEl.textContent = "No items selected", 1200);
   }catch(err){
-    summaryTextEl.textContent = "Sell failed";
+    summaryTextEl.textContent = err?.message || "Sell failed";
+  }finally{
+    updateUI();
   }
 });
 
-/* 初始化 */
-injectQtyControls();
-updateUI();
+giftBtnEl?.addEventListener("click", async ()=>{
+  const skus = Object.keys(cart);
+  if(!skus.length) return;
+
+  giftBtnEl.disabled = true;
+  summaryTextEl.textContent = "Submitting gift...";
+
+  try{
+    const items = skus.map(sku => ({ sku, qty: cart[sku] }));
+
+    await postJson(`${API_BASE}/api/losses/batch`, {
+      items,
+      request_id: crypto.randomUUID(),
+      loss_type: "GIFT",
+      note: ""
+    }, {
+      "X-API-Key": API_KEY
+    });
+
+    for(const k of Object.keys(cart)) delete cart[k];
+    updateUI();
+    if (cartDrawer.classList.contains("open")) cartDrawer.classList.remove("open");
+
+    summaryTextEl.textContent = "Gift recorded ✓";
+    setTimeout(()=> summaryTextEl.textContent = "No items selected", 1200);
+  }catch(err){
+    summaryTextEl.textContent = err?.message || "Gift failed";
+  }finally{
+    updateUI();
+  }
+});
+
+/** =========================
+ *  Image preview (delegation)
+ *  关键：因为 item 是动态生成的
+ * ========================= */
+const preview = document.querySelector('.image-preview');
+const previewImage = document.querySelector('.image-preview-img');
+const previewClose = document.querySelector('.image-preview-close');
+
+function closePreview(){
+  preview.classList.remove('is-open');
+  preview.setAttribute('aria-hidden', 'true');
+  previewImage.src = '';
+  previewImage.alt = '';
+  document.body.classList.remove('preview-open');
+}
+
+document.addEventListener("click", (event) => {
+  const link = event.target.closest(".item a");
+  if (!link) return;
+
+  event.preventDefault();
+  const img = link.querySelector("img");
+  previewImage.src = link.getAttribute("href");
+  previewImage.alt = img ? img.alt : "Vista previa";
+  preview.classList.add("is-open");
+  preview.setAttribute("aria-hidden","false");
+  document.body.classList.add("preview-open");
+});
+
+preview.addEventListener('click', (event) => {
+  if (event.target === preview) closePreview();
+});
+previewClose.addEventListener('click', closePreview);
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && preview.classList.contains('is-open')) closePreview();
+});
+
+/** =========================
+ *  AUTO RENDER MENU
+ * ========================= */
+async function loadProducts(){
+  const res = await fetch(`${API_BASE}/api/products`);
+  if (!res.ok) throw new Error("Failed to load products");
+  return await res.json(); // [{sku,name,category,sell_price,image_url,badge}]
+}
+
+function groupByCategory(products){
+  const map = new Map();
+  for (const p of products){
+    const cat = String(p.category || "Other").trim();
+    if (!map.has(cat)) map.set(cat, []);
+    map.get(cat).push(p);
+  }
+  return map;
+}
+
+function sortCategories(cats){
+  return cats.sort((a,b)=>{
+    const ia = CATEGORY_ORDER.indexOf(a);
+    const ib = CATEGORY_ORDER.indexOf(b);
+    if (ia === -1 && ib === -1) return a.localeCompare(b);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+}
+
+function renderMenu(products){
+  const groups = groupByCategory(products);
+  const categories = sortCategories(Array.from(groups.keys()));
+
+  menuRoot.innerHTML = "";
+
+  for (const cat of categories){
+    const label = CATEGORY_LABEL[cat] || `🧺 ${escapeHtml(cat)}`;
+
+    const catDiv = document.createElement("div");
+    catDiv.className = "category";
+    catDiv.innerHTML = `<h2 class="category-title">${label}</h2>`;  
+
+    const items = groups.get(cat) || [];
+    items.sort((x,y)=> String(x.sku).localeCompare(String(y.sku)));
+
+    for (const p of items){
+      const badgeText = String(p.badge || "").trim();
+      const badgeHtml = badgeText
+        ? `<span class="item-badge"><span class="item-badge-star">⭐</span>${escapeHtml(badgeText)}</span>`
+        : "";
+
+      const imgUrl = String(p.image_url || "").trim();
+
+      const item = document.createElement("div");
+      item.className = "item";
+      item.setAttribute("data-sku", p.sku);
+
+      item.innerHTML = `
+        <a href="${escapeHtml(imgUrl)}">
+          <img loading="lazy" src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.name)}">
+        </a>
+        <div class="item-name">${escapeHtml(p.name)} ${badgeHtml}</div>
+        <div class="item-price">${fmtPrice(p.sell_price)}</div>
+        <div class="qty-control"></div>
+      `;
+
+      catDiv.appendChild(item);
+    }
+
+    menuRoot.appendChild(catDiv);
+  }
+
+  updateUI();
+}
+
+(async function init(){
+  try{
+    const products = await loadProducts();
+    renderMenu(products);
+    updateUI();
+  }catch(e){
+    console.error(e);
+    menuRoot.innerHTML = `<div style="padding:16px;font-weight:900;">Failed to load menu.</div>`;
+  }
+})();
 </script>
 </body>
 </html>
