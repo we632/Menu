@@ -400,23 +400,51 @@ const menuRoot = document.getElementById("menuRoot");
 
 // Excel 使用英文分类
 const CATEGORY_ORDER = [
-  "Cookies",
-  "Chips",
-  "Candy",
-  "Protein",
-  "Drinks",
-  "Gum",
+  "cookies",
+  "chips",
+  "candy",
+  "protein",
+  "drinks",
+  "gum",
 ];
 
-// 映射：英文 → 西班牙语展示
-const CATEGORY_LABEL = {
-  "Cookies": "🍪 Galletas y dulces horneados",
-  "Chips": "🥔 Papas y botanas crujientes",
-  "Candy": "🍬 Dulces y chocolates",
-  "Protein": "💪 Barras de proteína",
-  "Drinks": "🥤 Bebidas",
-  "Gum": "🍃 Chicles",
+// 分类显示配置：先按标准分类映射；未知分类走备用图标池
+const SHOW_CATEGORY_ICON = true;
+const CATEGORY_META = {
+  cookies: { icon: "🍪", label: "Galletas y dulces horneados" },
+  chips: { icon: "🥔", label: "Papas y botanas crujientes" },
+  candy: { icon: "🍬", label: "Dulces y chocolates" },
+  protein: { icon: "💪", label: "Barras de proteína" },
+  drinks: { icon: "🥤", label: "Bebidas" },
+  gum: { icon: "🍃", label: "Chicles" },
 };
+const FALLBACK_CATEGORY_ICONS = ["🧺", "🍱", "🍿", "🍩", "🥨", "🧃", "🍓", "🥜", "🍫", "🧁"];
+
+function normalizeCategoryKey(v){
+  return String(v || "").trim().toLowerCase();
+}
+
+function pickFallbackCategoryIcon(category){
+  let hash = 0;
+  const s = String(category || "");
+  for (let i = 0; i < s.length; i++) hash = ((hash << 5) - hash) + s.charCodeAt(i);
+  const idx = Math.abs(hash) % FALLBACK_CATEGORY_ICONS.length;
+  return FALLBACK_CATEGORY_ICONS[idx];
+}
+
+function getCategoryLabelHtml(category){
+  const raw = String(category || "Other").trim() || "Other";
+  const key = normalizeCategoryKey(raw);
+  const meta = CATEGORY_META[key];
+  const text = meta ? meta.label : raw;
+  if (!SHOW_CATEGORY_ICON) return escapeHtml(text);
+  const icon = meta ? meta.icon : pickFallbackCategoryIcon(raw);
+  return `${icon} ${escapeHtml(text)}`;
+}
+
+function getCategoryOrderIndex(category){
+  return CATEGORY_ORDER.indexOf(normalizeCategoryKey(category));
+}
 
 function fmtPrice(n){
   const v = Number(n);
@@ -731,8 +759,8 @@ function groupByCategory(products){
 
 function sortCategories(cats){
   return cats.sort((a,b)=>{
-    const ia = CATEGORY_ORDER.indexOf(a);
-    const ib = CATEGORY_ORDER.indexOf(b);
+    const ia = getCategoryOrderIndex(a);
+    const ib = getCategoryOrderIndex(b);
     if (ia === -1 && ib === -1) return a.localeCompare(b);
     if (ia === -1) return 1;
     if (ib === -1) return -1;
@@ -747,7 +775,7 @@ function renderMenu(products){
   menuRoot.innerHTML = "";
 
   for (const cat of categories){
-    const label = CATEGORY_LABEL[cat] || `🧺 ${escapeHtml(cat)}`;
+    const label = getCategoryLabelHtml(cat);
 
     const catDiv = document.createElement("div");
     catDiv.className = "category";
