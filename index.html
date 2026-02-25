@@ -74,6 +74,10 @@ body{
   opacity:.45;
 }
 
+.item.is-unorderable{
+  background:#f3f4f6 !important;
+}
+
 .item.is-unorderable .item-name,
 .item.is-unorderable .item-price,
 .item.is-unorderable .item-badge{
@@ -499,12 +503,18 @@ function parsePrice(text){
   return Number.isFinite(n) ? n : 0;
 }
 
+function isUnavailableBadgeText(text){
+  const badgeText = String(text || "").trim().toLowerCase();
+  if (!badgeText) return false;
+  return /out\s*of\s*stock|coming\s*up\s*soon|coming\s*soon|non[-\s]?orderable|sold\s*out|unavailable/.test(badgeText);
+}
+
 function getBadgeMeta(product){
   const badgeText = String(product?.badge || "").trim();
   const stockStatus = String(product?.stock_status || "").toLowerCase();
   const isOutByStatus = stockStatus === "out_of_stock" || stockStatus === "non_orderable";
   const isOutByFlag = product?.orderable === false || product?.is_orderable === false;
-  const isOutByText = /out\s*of\s*stock|non[-\s]?orderable|sold\s*out|unavailable/.test(badgeText.toLowerCase());
+  const isOutByText = isUnavailableBadgeText(badgeText);
   const isOutOfStock = isOutByStatus || isOutByFlag || isOutByText;
 
   if (isOutOfStock){
@@ -916,7 +926,9 @@ function renderMenu(products){
         : "";
 
       const imgUrl = String(p.image_url || "").trim();
-      const orderable = p.orderable !== false;
+      const orderableByFlag = p.orderable !== false && p.is_orderable !== false;
+      const orderableByBadge = !(badge && badge.type === "oos");
+      const orderable = orderableByFlag && orderableByBadge;
 
       productMetaBySku.set(String(p.sku), {
         orderable,
