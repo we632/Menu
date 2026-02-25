@@ -130,6 +130,12 @@ body.preview-open{overflow:hidden}
   box-shadow: 0 8px 18px rgba(255,126,95,.25);
 }
 
+.qty-btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
 .qty-btn.minus{
   background: #374151;
 }
@@ -469,10 +475,18 @@ function parsePrice(text){
  *  CART + QTY
  * ========================= */
 const cart = {}; // { sku: qty }
+const productMetaBySku = new Map();
 
 function getQty(sku){ return cart[sku] || 0; }
 
 function setQty(sku, qty){
+  const meta = productMetaBySku.get(String(sku));
+  if (meta && meta.orderable === false){
+    delete cart[sku];
+    updateUI();
+    return;
+  }
+
   const q = Math.max(0, Math.floor(Number(qty) || 0));
   if (q === 0) delete cart[sku];
   else cart[sku] = q;
@@ -486,6 +500,12 @@ function updateQtyControls(){
     const sku = item.dataset.sku;
     const container = item.querySelector(".qty-control");
     if (!container) return;
+
+    const orderable = item.dataset.orderable !== "false";
+    if (!orderable){
+      container.innerHTML = `<button class="qty-btn plus" type="button" disabled>+</button>`;
+      return;
+    }
 
     const qty = getQty(sku);
     if (qty === 0){
@@ -513,6 +533,7 @@ document.addEventListener("click",(e)=>{
   e.stopPropagation();
 
   const sku = item.dataset.sku;
+  if (item.dataset.orderable === "false") return;
   if (plus) setQty(sku, getQty(sku) + 1);
   if (minus) setQty(sku, getQty(sku) - 1);
 });
@@ -546,12 +567,22 @@ cartDrawer.addEventListener("click",(e)=>{
 });
 
 function updateUI(){
+  for (const sku of Object.keys(cart)){
+    const meta = productMetaBySku.get(String(sku));
+    if (meta && meta.orderable === false) delete cart[sku];
+  }
+
   updateQtyControls();
 
   const totalQty = Object.values(cart).reduce((a,b)=>a+b,0);
   let defaultSummary = "No items selected";
 
-  if(totalQty === 0){
+  const hasUnorderableInCart = Object.keys(cart).some((sku)=>{
+    const meta = productMetaBySku.get(String(sku));
+    return meta?.orderable === false;
+  });
+
+  if(totalQty === 0 || hasUnorderableInCart){
     sellBtnEl.disabled = true;
     clearBtnEl.disabled = true;
     if (giftBtnEl) giftBtnEl.disabled = true;
@@ -744,7 +775,7 @@ document.addEventListener('keydown', (event) => {
 async function loadProducts(){
   const res = await fetch(`${API_BASE}/api/products`);
   if (!res.ok) throw new Error("Failed to load products");
-  return await res.json(); // [{sku,name,category,sell_price,image_url,badge}]
+  return await res.json(); // [{sku,name,category,sell_price,image_url,badge,orderable}]
 }
 
 function groupByCategory(products){
@@ -769,6 +800,8 @@ function sortCategories(cats){
 }
 
 function renderMenu(products){
+  productMetaBySku.clear();
+
   const groups = groupByCategory(products);
   const categories = sortCategories(Array.from(groups.keys()));
 
@@ -791,10 +824,17 @@ function renderMenu(products){
         : "";
 
       const imgUrl = String(p.image_url || "").trim();
+      const orderable = p.orderable !== false;
+
+      productMetaBySku.set(String(p.sku), {
+        orderable,
+        badge: badgeText,
+      });
 
       const item = document.createElement("div");
       item.className = "item";
       item.setAttribute("data-sku", p.sku);
+      item.setAttribute("data-orderable", orderable ? "true" : "false");
 
       item.innerHTML = `
         <a href="${escapeHtml(imgUrl)}">
