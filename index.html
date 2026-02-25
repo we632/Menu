@@ -68,6 +68,17 @@ body{
   border-radius:999px;
   white-space:nowrap;
 }
+
+.item.is-unorderable img{
+  filter:grayscale(100%);
+  opacity:.45;
+}
+
+.item.is-unorderable .item-name,
+.item.is-unorderable .item-price,
+.item.is-unorderable .item-badge{
+  opacity:.55;
+}
 .item-badge{
   display:inline-flex;
   align-items:center;
@@ -134,6 +145,12 @@ body.preview-open{overflow:hidden}
   color: #fff;
   background: linear-gradient(135deg, var(--brand), #ff9f7f);
   box-shadow: 0 8px 18px rgba(255,126,95,.25);
+}
+
+.qty-btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  box-shadow:none;
 }
 
 .qty-btn.minus{
@@ -407,23 +424,51 @@ const menuRoot = document.getElementById("menuRoot");
 
 // Excel 使用英文分类
 const CATEGORY_ORDER = [
-  "Cookies",
-  "Chips",
-  "Candy",
-  "Protein",
-  "Drinks",
-  "Gum",
+  "cookies",
+  "chips",
+  "candy",
+  "protein",
+  "drinks",
+  "gum",
 ];
 
-// 映射：英文 → 西班牙语展示
-const CATEGORY_LABEL = {
-  "Cookies": "🍪 Galletas y dulces horneados",
-  "Chips": "🥔 Papas y botanas crujientes",
-  "Candy": "🍬 Dulces y chocolates",
-  "Protein": "💪 Barras de proteína",
-  "Drinks": "🥤 Bebidas",
-  "Gum": "🍃 Chicles",
+// 分类显示配置：先按标准分类映射；未知分类走备用图标池
+const SHOW_CATEGORY_ICON = true;
+const CATEGORY_META = {
+  cookies: { icon: "🍪", label: "Galletas y dulces horneados" },
+  chips: { icon: "🥔", label: "Papas y botanas crujientes" },
+  candy: { icon: "🍬", label: "Dulces y chocolates" },
+  protein: { icon: "💪", label: "Barras de proteína" },
+  drinks: { icon: "🥤", label: "Bebidas" },
+  gum: { icon: "🍃", label: "Chicles" },
 };
+const FALLBACK_CATEGORY_ICONS = ["🧺", "🍱", "🍿", "🍩", "🥨", "🧃", "🍓", "🥜", "🍫", "🧁"];
+
+function normalizeCategoryKey(v){
+  return String(v || "").trim().toLowerCase();
+}
+
+function pickFallbackCategoryIcon(category){
+  let hash = 0;
+  const s = String(category || "");
+  for (let i = 0; i < s.length; i++) hash = ((hash << 5) - hash) + s.charCodeAt(i);
+  const idx = Math.abs(hash) % FALLBACK_CATEGORY_ICONS.length;
+  return FALLBACK_CATEGORY_ICONS[idx];
+}
+
+function getCategoryLabelHtml(category){
+  const raw = String(category || "Other").trim() || "Other";
+  const key = normalizeCategoryKey(raw);
+  const meta = CATEGORY_META[key];
+  const text = meta ? meta.label : raw;
+  if (!SHOW_CATEGORY_ICON) return escapeHtml(text);
+  const icon = meta ? meta.icon : pickFallbackCategoryIcon(raw);
+  return `${icon} ${escapeHtml(text)}`;
+}
+
+function getCategoryOrderIndex(category){
+  return CATEGORY_ORDER.indexOf(normalizeCategoryKey(category));
+}
 
 function fmtPrice(n){
   const v = Number(n);
@@ -473,10 +518,18 @@ function getBadgeMeta(product){
  *  CART + QTY
  * ========================= */
 const cart = {}; // { sku: qty }
+const productMetaBySku = new Map();
 
 function getQty(sku){ return cart[sku] || 0; }
 
 function setQty(sku, qty){
+  const meta = productMetaBySku.get(String(sku));
+  if (meta && meta.orderable === false){
+    delete cart[sku];
+    updateUI();
+    return;
+  }
+
   const q = Math.max(0, Math.floor(Number(qty) || 0));
   if (q === 0) delete cart[sku];
   else cart[sku] = q;
@@ -490,6 +543,12 @@ function updateQtyControls(){
     const sku = item.dataset.sku;
     const container = item.querySelector(".qty-control");
     if (!container) return;
+
+    const orderable = item.dataset.orderable !== "false";
+    if (!orderable){
+      container.innerHTML = `<button class="qty-btn plus" type="button" disabled>+</button>`;
+      return;
+    }
 
     const qty = getQty(sku);
     if (qty === 0){
@@ -517,6 +576,7 @@ document.addEventListener("click",(e)=>{
   e.stopPropagation();
 
   const sku = item.dataset.sku;
+  if (item.dataset.orderable === "false") return;
   if (plus) setQty(sku, getQty(sku) + 1);
   if (minus) setQty(sku, getQty(sku) - 1);
 });
@@ -534,6 +594,8 @@ const cartClose = document.getElementById("cartClose");
 const cartItemsEl = document.getElementById("cartItems");
 const cartTotalEl = document.getElementById("cartTotal");
 const cartTotalPriceEl = document.getElementById("cartTotalPrice");
+let summaryOverrideText = "";
+let summaryOverrideTimer = null;
 
 /** 点 Cart 才打开 drawer */
 document.querySelector(".sell-summary").addEventListener("click",()=>{
@@ -548,20 +610,48 @@ cartDrawer.addEventListener("click",(e)=>{
 });
 
 function updateUI(){
+  for (const sku of Object.keys(cart)){
+    const meta = productMetaBySku.get(String(sku));
+    if (meta && meta.orderable === false) delete cart[sku];
+  }
+
   updateQtyControls();
 
   const totalQty = Object.values(cart).reduce((a,b)=>a+b,0);
+  let defaultSummary = "No items selected";
 
-  if(totalQty === 0){
-    summaryTextEl.textContent = "No items selected";
+  const hasUnorderableInCart = Object.keys(cart).some((sku)=>{
+    const meta = productMetaBySku.get(String(sku));
+    return meta?.orderable === false;
+  });
+
+  if(totalQty === 0 || hasUnorderableInCart){
     sellBtnEl.disabled = true;
     clearBtnEl.disabled = true;
     if (giftBtnEl) giftBtnEl.disabled = true;
   }else{
-    summaryTextEl.textContent = `${totalQty} item(s)`;
+    defaultSummary = `${totalQty} item(s)`;
     sellBtnEl.disabled = false;
     clearBtnEl.disabled = false;
     if (giftBtnEl) giftBtnEl.disabled = false;
+  }
+
+  summaryTextEl.textContent = summaryOverrideText || defaultSummary;
+}
+
+function setSummaryOverride(text, durationMs = 0){
+  summaryOverrideText = String(text || "").trim();
+  if (summaryOverrideTimer){
+    clearTimeout(summaryOverrideTimer);
+    summaryOverrideTimer = null;
+  }
+  updateUI();
+  if (durationMs > 0){
+    summaryOverrideTimer = setTimeout(()=>{
+      summaryOverrideText = "";
+      summaryOverrideTimer = null;
+      updateUI();
+    }, durationMs);
   }
 }
 
@@ -628,7 +718,7 @@ sellBtnEl.addEventListener("click", async ()=>{
 
   sellBtnEl.disabled = true;
   clearBtnEl.disabled = true;
-  summaryTextEl.textContent = "Submitting...";
+  setSummaryOverride("Submitting...");
 
   try{
     await postJson(apiUrl("api/sales/batch"), {
@@ -636,7 +726,6 @@ sellBtnEl.addEventListener("click", async ()=>{
       request_id: crypto.randomUUID(),
       note: ""
     }, {
-      "X-API-Key": API_KEY,
       "X-Sell-Pin": pin
     });
 
@@ -644,10 +733,9 @@ sellBtnEl.addEventListener("click", async ()=>{
     updateUI();
     if (cartDrawer.classList.contains("open")) cartDrawer.classList.remove("open");
 
-    summaryTextEl.textContent = "Sold ✓";
-    setTimeout(()=> summaryTextEl.textContent = "No items selected", 1200);
+    setSummaryOverride("Sold ✓", 1200);
   }catch(err){
-    summaryTextEl.textContent = err?.message || "Sell failed";
+    setSummaryOverride(err?.message || "Sell failed", 3000);
   }finally{
     updateUI();
   }
@@ -657,8 +745,11 @@ giftBtnEl?.addEventListener("click", async ()=>{
   const skus = Object.keys(cart);
   if(!skus.length) return;
 
+  const pin = prompt("Enter PIN to confirm gift:");
+  if (!pin) return;
+
   giftBtnEl.disabled = true;
-  summaryTextEl.textContent = "Submitting gift...";
+  setSummaryOverride("Submitting gift...");
 
   try{
     const items = skus.map(sku => ({ sku, qty: cart[sku] }));
@@ -669,17 +760,16 @@ giftBtnEl?.addEventListener("click", async ()=>{
       loss_type: "GIFT",
       note: ""
     }, {
-      "X-API-Key": API_KEY
+      "X-Sell-Pin": pin
     });
 
     for(const k of Object.keys(cart)) delete cart[k];
     updateUI();
     if (cartDrawer.classList.contains("open")) cartDrawer.classList.remove("open");
 
-    summaryTextEl.textContent = "Gift recorded ✓";
-    setTimeout(()=> summaryTextEl.textContent = "No items selected", 1200);
+    setSummaryOverride("Gift recorded ✓", 1200);
   }catch(err){
-    summaryTextEl.textContent = err?.message || "Gift failed";
+    setSummaryOverride(err?.message || "Gift failed", 3000);
   }finally{
     updateUI();
   }
@@ -781,8 +871,8 @@ function groupByCategory(products){
 
 function sortCategories(cats){
   return cats.sort((a,b)=>{
-    const ia = CATEGORY_ORDER.indexOf(a);
-    const ib = CATEGORY_ORDER.indexOf(b);
+    const ia = getCategoryOrderIndex(a);
+    const ib = getCategoryOrderIndex(b);
     if (ia === -1 && ib === -1) return a.localeCompare(b);
     if (ia === -1) return 1;
     if (ib === -1) return -1;
@@ -791,13 +881,15 @@ function sortCategories(cats){
 }
 
 function renderMenu(products){
+  productMetaBySku.clear();
+
   const groups = groupByCategory(products);
   const categories = sortCategories(Array.from(groups.keys()));
 
   menuRoot.innerHTML = "";
 
   for (const cat of categories){
-    const label = CATEGORY_LABEL[cat] || `🧺 ${escapeHtml(cat)}`;
+    const label = getCategoryLabelHtml(cat);
 
     const catDiv = document.createElement("div");
     catDiv.className = "category";
@@ -813,10 +905,17 @@ function renderMenu(products){
         : "";
 
       const imgUrl = String(p.image_url || "").trim();
+      const orderable = p.orderable !== false;
+
+      productMetaBySku.set(String(p.sku), {
+        orderable,
+        badge: badgeText,
+      });
 
       const item = document.createElement("div");
-      item.className = "item";
+      item.className = `item${orderable ? "" : " is-unorderable"}`;
       item.setAttribute("data-sku", p.sku);
+      item.setAttribute("data-orderable", orderable ? "true" : "false");
 
       item.innerHTML = `
         <a href="${escapeHtml(imgUrl)}">
