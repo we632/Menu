@@ -418,7 +418,17 @@ body.preview-open{overflow:hidden}
 /** =========================
  *  CONFIG
  * ========================= */
-const API_BASE = "https://menu-backend-8s25.onrender.com"; // ✅ 上线后换成 https://你的后端域名
+const API_BASE = (() => {
+  const fromQuery = new URLSearchParams(window.location.search).get("api");
+  if (fromQuery) return fromQuery.replace(/\/+$/, "");
+
+  const isLocalHost = /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+  if (window.location.protocol.startsWith("http") && isLocalHost){
+    return `${window.location.protocol}//${window.location.hostname}:8000`;
+  }
+
+  return "https://menu-backend-8s25.onrender.com";
+})(); // 本地自动走 :8000；线上默认走 Render
 const API_KEY  = "4f93kKz8LmPq21XyN7uQaBcD"; // ✅ 你现在的 key（注意：GitHub Pages 会暴露它）
 const menuRoot = document.getElementById("menuRoot");
 
@@ -900,6 +910,7 @@ function renderMenu(products){
 
     for (const p of items){
       const badge = getBadgeMeta(p);
+      const badgeText = badge?.text || "";
       const badgeHtml = badge
         ? `<span class="item-badge item-badge-${badge.type}"><span class="item-badge-icon" aria-hidden="true">${badge.icon}</span>${escapeHtml(badge.text)}</span>`
         : "";
