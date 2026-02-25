@@ -86,14 +86,20 @@ body{
   margin-left:10px;
   font-size:clamp(.78rem,1.8vw,1rem);
   font-weight:700;
-  color:#8a4b00;
-  background:#fff1bf;
   border-radius:999px;
   padding:5px 10px;
   vertical-align:middle;
 }
-.item-badge-star{
-  font-size:1.4em;
+.item-badge-best{
+  color:#8a4b00;
+  background:#fff1bf;
+}
+.item-badge-oos{
+  color:#7f1d1d;
+  background:#fee2e2;
+}
+.item-badge-icon{
+  font-size:1.15em;
   line-height:1;
 }
 .footer{
@@ -412,7 +418,8 @@ body.preview-open{overflow:hidden}
 /** =========================
  *  CONFIG
  * ========================= */
-const API_BASE = "https://menu-backend-8s25.onrender.com"; // ✅ 上线后换成 https://你的后端域名（不要结尾 /）
+const API_BASE = "https://menu-backend-8s25.onrender.com"; // ✅ 上线后换成 https://你的后端域名
+const API_KEY  = "4f93kKz8LmPq21XyN7uQaBcD"; // ✅ 你现在的 key（注意：GitHub Pages 会暴露它）
 const menuRoot = document.getElementById("menuRoot");
 
 // Excel 使用英文分类
@@ -480,6 +487,31 @@ function escapeHtml(s){
 function parsePrice(text){
   const n = Number(String(text || "").replace(/[^0-9.]/g, ""));
   return Number.isFinite(n) ? n : 0;
+}
+
+function getBadgeMeta(product){
+  const badgeText = String(product?.badge || "").trim();
+  const stockStatus = String(product?.stock_status || "").toLowerCase();
+  const isOutByStatus = stockStatus === "out_of_stock" || stockStatus === "non_orderable";
+  const isOutByFlag = product?.orderable === false || product?.is_orderable === false;
+  const isOutByText = /out\s*of\s*stock|non[-\s]?orderable|sold\s*out|unavailable/.test(badgeText.toLowerCase());
+  const isOutOfStock = isOutByStatus || isOutByFlag || isOutByText;
+
+  if (isOutOfStock){
+    return {
+      type: "oos",
+      text: badgeText || "Out of Stock",
+      icon: "⛔"
+    };
+  }
+
+  if (!badgeText) return null;
+
+  return {
+    type: "best",
+    text: badgeText,
+    icon: "⭐"
+  };
 }
 
 /** =========================
@@ -689,7 +721,7 @@ sellBtnEl.addEventListener("click", async ()=>{
   setSummaryOverride("Submitting...");
 
   try{
-    await postJson(`${API_BASE}/api/sales/batch`, {
+    await postJson(apiUrl("api/sales/batch"), {
       items,
       request_id: crypto.randomUUID(),
       note: ""
@@ -722,7 +754,7 @@ giftBtnEl?.addEventListener("click", async ()=>{
   try{
     const items = skus.map(sku => ({ sku, qty: cart[sku] }));
 
-    await postJson(`${API_BASE}/api/losses/batch`, {
+    await postJson(apiUrl("api/losses/batch"), {
       items,
       request_id: crypto.randomUUID(),
       loss_type: "GIFT",
@@ -783,10 +815,48 @@ document.addEventListener('keydown', (event) => {
 /** =========================
  *  AUTO RENDER MENU
  * ========================= */
+function apiUrl(path){
+  const normalizedPath = String(path || "").replace(/^\/+/, "");
+  return `${API_BASE}/${normalizedPath}`;
+}
+
 async function loadProducts(){
-  const res = await fetch(`${API_BASE}/api/products`);
-  if (!res.ok) throw new Error("Failed to load products");
-  return await res.json(); // [{sku,name,category,sell_price,image_url,badge,orderable}]
+  const endpoint = apiUrl("api/products");
+  const attempts = [
+    {
+      label: "header-auth",
+      url: endpoint,
+      options: { headers: { "X-API-Key": API_KEY } }
+    },
+    {
+      label: "query-auth",
+      url: `${endpoint}?api_key=${encodeURIComponent(API_KEY)}`,
+      options: {}
+    },
+    {
+      label: "public",
+      url: endpoint,
+      options: {}
+    }
+  ];
+
+  const errors = [];
+
+  for (const attempt of attempts){
+    try{
+      const res = await fetch(attempt.url, attempt.options);
+      if (res.ok) return await res.json(); // [{sku,name,category,sell_price,image_url,badge}]
+
+      const reason = (await res.text().catch(()=>"")).trim();
+      errors.push(`${attempt.label}: ${res.status}${reason ? ` ${reason}` : ""}`);
+
+      if (res.status !== 401 && res.status !== 403) break;
+    }catch(err){
+      errors.push(`${attempt.label}: ${err?.message || "network error"}`);
+    }
+  }
+
+  throw new Error(`Failed to load products (${errors.join(" | ")})`);
 }
 
 function groupByCategory(products){
@@ -829,9 +899,9 @@ function renderMenu(products){
     items.sort((x,y)=> String(x.sku).localeCompare(String(y.sku)));
 
     for (const p of items){
-      const badgeText = String(p.badge || "").trim();
-      const badgeHtml = badgeText
-        ? `<span class="item-badge"><span class="item-badge-star">⭐</span>${escapeHtml(badgeText)}</span>`
+      const badge = getBadgeMeta(p);
+      const badgeHtml = badge
+        ? `<span class="item-badge item-badge-${badge.type}"><span class="item-badge-icon" aria-hidden="true">${badge.icon}</span>${escapeHtml(badge.text)}</span>`
         : "";
 
       const imgUrl = String(p.image_url || "").trim();
