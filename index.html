@@ -984,7 +984,8 @@ function renderMenu(products){
     for (const p of items){
       const badge = getBadgeMeta(p);
       const badgeText = badge?.text || "";
-      const badgeHtml = badge
+      const showNameBadge = badge && badge.unavailable !== true;
+      const badgeHtml = showNameBadge
         ? `<span class="item-badge item-badge-${badge.type}"><span class="item-badge-icon" aria-hidden="true">${badge.icon}</span>${escapeHtml(badge.text)}</span>`
         : "";
 
