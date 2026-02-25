@@ -68,6 +68,17 @@ body{
   border-radius:999px;
   white-space:nowrap;
 }
+
+.item.is-unorderable img{
+  filter:grayscale(100%);
+  opacity:.45;
+}
+
+.item.is-unorderable .item-name,
+.item.is-unorderable .item-price,
+.item.is-unorderable .item-badge{
+  opacity:.55;
+}
 .item-badge{
   display:inline-flex;
   align-items:center;
@@ -832,7 +843,7 @@ function renderMenu(products){
       });
 
       const item = document.createElement("div");
-      item.className = "item";
+      item.className = `item${orderable ? "" : " is-unorderable"}`;
       item.setAttribute("data-sku", p.sku);
       item.setAttribute("data-orderable", orderable ? "true" : "false");
 
