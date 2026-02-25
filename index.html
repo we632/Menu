@@ -99,8 +99,22 @@ body{
   background:#fff1bf;
 }
 .item-badge-oos{
-  color:#7f1d1d;
-  background:#fee2e2;
+  color:#fff;
+  background:linear-gradient(135deg,#b91c1c,#dc2626);
+  box-shadow:0 8px 16px rgba(185,28,28,.35);
+  border:1px solid #991b1b;
+  font-weight:900;
+  letter-spacing:.25px;
+  text-transform:uppercase;
+}
+.item-badge-soon{
+  color:#fff;
+  background:linear-gradient(135deg,#b45309,#f59e0b);
+  box-shadow:0 8px 16px rgba(180,83,9,.30);
+  border:1px solid #92400e;
+  font-weight:900;
+  letter-spacing:.25px;
+  text-transform:uppercase;
 }
 .item-badge-icon{
   font-size:1.15em;
@@ -136,6 +150,35 @@ body.preview-open{overflow:hidden}
   display:flex;
   align-items:center;
   gap:6px;
+}
+
+.qty-unavailable{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:108px;
+  padding:8px 10px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.35px;
+  text-transform:uppercase;
+  color:#fff;
+  background:linear-gradient(135deg,#6b7280,#374151);
+  border:1px solid #1f2937;
+  box-shadow:0 6px 12px rgba(31,41,55,.3);
+  cursor:not-allowed;
+  user-select:none;
+}
+
+.qty-unavailable-oos{
+  background:linear-gradient(135deg,#b91c1c,#dc2626);
+  border-color:#991b1b;
+}
+
+.qty-unavailable-soon{
+  background:linear-gradient(135deg,#b45309,#f59e0b);
+  border-color:#92400e;
 }
 
 .qty-btn{
@@ -247,6 +290,11 @@ body.preview-open{overflow:hidden}
   .sell-submit{ min-width: 120px; }
   .item{ padding-right: 58px; }
   .add-btn{ width: 40px; height: 40px; right: 10px; }
+  .qty-unavailable{
+    min-width: 94px;
+    font-size:10px;
+    padding:7px 8px;
+  }
 }
 .cart-drawer{
   position:fixed;
@@ -509,6 +557,12 @@ function isUnavailableBadgeText(text){
   return /out\s*of\s*stock|coming\s*up\s*soon|coming\s*soon|non[-\s]?orderable|sold\s*out|unavailable/.test(badgeText);
 }
 
+function isComingSoonBadgeText(text){
+  const badgeText = String(text || "").trim().toLowerCase();
+  if (!badgeText) return false;
+  return /coming\s*up\s*soon|coming\s*soon/.test(badgeText);
+}
+
 function getBadgeMeta(product){
   const badgeText = String(product?.badge || "").trim();
   const stockStatus = String(product?.stock_status || "").toLowerCase();
@@ -516,12 +570,14 @@ function getBadgeMeta(product){
   const isOutByFlag = product?.orderable === false || product?.is_orderable === false;
   const isOutByText = isUnavailableBadgeText(badgeText);
   const isOutOfStock = isOutByStatus || isOutByFlag || isOutByText;
+  const isComingSoon = isComingSoonBadgeText(badgeText);
 
   if (isOutOfStock){
     return {
-      type: "oos",
-      text: badgeText || "Out of Stock",
-      icon: "⛔"
+      type: isComingSoon ? "soon" : "oos",
+      text: badgeText || (isComingSoon ? "Coming Up Soon" : "Out of Stock"),
+      icon: isComingSoon ? "🔜" : "⛔",
+      unavailable: true,
     };
   }
 
@@ -566,7 +622,14 @@ function updateQtyControls(){
 
     const orderable = item.dataset.orderable !== "false";
     if (!orderable){
-      container.innerHTML = `<button class="qty-btn plus" type="button" disabled>+</button>`;
+      const meta = productMetaBySku.get(String(sku));
+      const reason = String(meta?.unavailableLabel || "Unavailable");
+      const unavailableType = String(meta?.unavailableType || "").toLowerCase();
+      const typeClass = unavailableType ? ` qty-unavailable-${unavailableType}` : "";
+      const text = unavailableType === "soon"
+        ? "COMING SOON"
+        : (unavailableType === "oos" ? "OUT OF STOCK" : "UNAVAILABLE");
+      container.innerHTML = `<span class="qty-unavailable${typeClass}" title="${escapeHtml(reason)}">${text}</span>`;
       return;
     }
 
@@ -927,12 +990,14 @@ function renderMenu(products){
 
       const imgUrl = String(p.image_url || "").trim();
       const orderableByFlag = p.orderable !== false && p.is_orderable !== false;
-      const orderableByBadge = !(badge && badge.type === "oos");
+      const orderableByBadge = !(badge && badge.unavailable === true);
       const orderable = orderableByFlag && orderableByBadge;
 
       productMetaBySku.set(String(p.sku), {
         orderable,
         badge: badgeText,
+        unavailableType: badge?.type || "",
+        unavailableLabel: badge?.text || (orderable ? "" : "Unavailable"),
       });
 
       const item = document.createElement("div");
