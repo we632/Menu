@@ -1270,10 +1270,14 @@ sellBtnEl.addEventListener("click", async ()=>{
 
   const items = skus.map(sku => ({ sku, qty: cart[sku] }));
   const discountItems = skus
-    .map((sku)=>({
-      sku,
-      qty: roundMoney(discountAmountBySku.get(sku)),
-    }))
+    .map((sku)=>{
+      const lossAmount = roundMoney(discountAmountBySku.get(sku));
+      return {
+        sku,
+        qty: lossAmount,
+        loss_amount: lossAmount,
+      };
+    })
     .filter((item)=> item.qty > 0);
 
   sellBtnEl.disabled = true;
@@ -1335,13 +1339,17 @@ giftBtnEl?.addEventListener("click", async ()=>{
   setSummaryOverride("Submitting gift...");
 
   try{
-    const items = skus.map(sku => ({ sku, qty: cart[sku] }));
+    const items = skus.map((sku) => {
+      const qty = cart[sku];
+      const lossAmount = roundMoney(getUnitPrice(sku) * qty);
+      return { sku, qty, loss_amount: lossAmount };
+    });
 
     await postJson(apiUrl("api/losses/batch"), {
       items,
       request_id: crypto.randomUUID(),
       loss_type: "GIFT",
-      note: ""
+      note: "Gift loss amount included"
     }, {
       "X-Sell-Pin": pin
     });
