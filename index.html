@@ -692,13 +692,13 @@ const menuRoot = document.getElementById("menuRoot");
 
 // Excel 使用英文分类
 const CATEGORY_ORDER = [
+  "promotion",
   "cookies",
   "chips",
   "candy",
   "protein",
   "drinks",
   "gum",
-  "promotion",
 ];
 
 // 分类显示配置：先按标准分类映射；未知分类走备用图标池
@@ -1043,8 +1043,7 @@ function renderPromotionList(){
     const name = meta?.name || sku;
     const cartQty = toWholeQty(cart[sku]);
     const amount = roundMoney(discountAmount);
-    const portionQty = discountAmountToPortionQty(sku, amount);
-    rows.push({ sku, name, cartQty, amount, portionQty });
+    rows.push({ sku, name, cartQty, amount });
   }
 
   if (!rows.length){
@@ -1056,7 +1055,7 @@ function renderPromotionList(){
     <div class="promo-item">
       <div class="promo-item-main">
         <div class="promo-item-name">${escapeHtml(row.name)}</div>
-        <div class="promo-item-meta">Cart qty: ${row.cartQty} · Discount: ${fmtPrice(row.amount)} (qty ${row.portionQty})</div>
+        <div class="promo-item-meta">Cart qty: ${row.cartQty} · Discount: ${fmtPrice(row.amount)}</div>
       </div>
       <button class="promo-item-remove" type="button" data-remove-discount="${encodeURIComponent(row.sku)}">Remove</button>
     </div>
@@ -1271,10 +1270,14 @@ sellBtnEl.addEventListener("click", async ()=>{
 
   const items = skus.map(sku => ({ sku, qty: cart[sku] }));
   const discountItems = skus
-    .map((sku)=>({
-      sku,
-      qty: discountAmountToPortionQty(sku, discountAmountBySku.get(sku)),
-    }))
+    .map((sku)=>{
+      const lossAmount = roundMoney(discountAmountBySku.get(sku));
+      return {
+        sku,
+        qty: lossAmount,
+        loss_amount: lossAmount,
+      };
+    })
     .filter((item)=> item.qty > 0);
 
   sellBtnEl.disabled = true;
@@ -1298,7 +1301,7 @@ sellBtnEl.addEventListener("click", async ()=>{
           items: discountItems,
           request_id: crypto.randomUUID(),
           loss_type: "DISCOUNT",
-          note: "Promotion discount amount converted to qty"
+          note: "Promotion discount amount"
         }, {
           "X-Sell-Pin": pin
         });
@@ -1336,13 +1339,17 @@ giftBtnEl?.addEventListener("click", async ()=>{
   setSummaryOverride("Submitting gift...");
 
   try{
-    const items = skus.map(sku => ({ sku, qty: cart[sku] }));
+    const items = skus.map((sku) => {
+      const qty = cart[sku];
+      const lossAmount = roundMoney(getUnitPrice(sku) * qty);
+      return { sku, qty, loss_amount: lossAmount };
+    });
 
     await postJson(apiUrl("api/losses/batch"), {
       items,
       request_id: crypto.randomUUID(),
       loss_type: "GIFT",
-      note: ""
+      note: "Gift loss amount included"
     }, {
       "X-Sell-Pin": pin
     });
