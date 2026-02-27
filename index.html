@@ -505,17 +505,52 @@ const CATEGORY_META = {
   gum: { icon: "🍃", label: "Chicles" },
 };
 const FALLBACK_CATEGORY_ICONS = ["🧺", "🍱", "🍿", "🍩", "🥨", "🧃", "🍓", "🥜", "🍫", "🧁"];
+const FALLBACK_CATEGORY_ICON_OVERRIDES = {
+  // 示例："limited special": "🌟",
+};
+const fallbackCategoryIconCache = new Map();
+const fallbackCategoryIconUsage = new Map(FALLBACK_CATEGORY_ICONS.map(icon => [icon, 0]));
 
 function normalizeCategoryKey(v){
   return String(v || "").trim().toLowerCase();
 }
 
 function pickFallbackCategoryIcon(category){
+  const key = normalizeCategoryKey(category);
+
+  if (FALLBACK_CATEGORY_ICON_OVERRIDES[key]){
+    return FALLBACK_CATEGORY_ICON_OVERRIDES[key];
+  }
+
+  if (fallbackCategoryIconCache.has(key)){
+    return fallbackCategoryIconCache.get(key);
+  }
+
+  if (!FALLBACK_CATEGORY_ICONS.length) return "🧺";
+
   let hash = 0;
-  const s = String(category || "");
+  const s = String(key || "");
   for (let i = 0; i < s.length; i++) hash = ((hash << 5) - hash) + s.charCodeAt(i);
-  const idx = Math.abs(hash) % FALLBACK_CATEGORY_ICONS.length;
-  return FALLBACK_CATEGORY_ICONS[idx];
+
+  const start = Math.abs(hash) % FALLBACK_CATEGORY_ICONS.length;
+  let bestIcon = FALLBACK_CATEGORY_ICONS[start];
+  let bestUsage = Number.POSITIVE_INFINITY;
+
+  for (let i = 0; i < FALLBACK_CATEGORY_ICONS.length; i++){
+    const idx = (start + i) % FALLBACK_CATEGORY_ICONS.length;
+    const icon = FALLBACK_CATEGORY_ICONS[idx];
+    const usage = fallbackCategoryIconUsage.get(icon) || 0;
+
+    if (usage < bestUsage){
+      bestUsage = usage;
+      bestIcon = icon;
+      if (usage === 0) break;
+    }
+  }
+
+  fallbackCategoryIconCache.set(key, bestIcon);
+  fallbackCategoryIconUsage.set(bestIcon, (fallbackCategoryIconUsage.get(bestIcon) || 0) + 1);
+  return bestIcon;
 }
 
 function getCategoryLabelHtml(category){
