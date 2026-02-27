@@ -181,6 +181,11 @@ body.preview-open{overflow:hidden}
   border-color:#92400e;
 }
 
+.qty-unavailable-promo{
+  background:linear-gradient(135deg,#c2410c,#fb923c);
+  border-color:#9a3412;
+}
+
 .qty-btn{
   width: 34px;
   height: 34px;
@@ -233,7 +238,7 @@ body.preview-open{overflow:hidden}
   margin: 0 auto;
   padding: 12px clamp(14px,4vw,30px);
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto auto auto;
   gap: 12px;
   align-items: center;
 }
@@ -269,6 +274,21 @@ body.preview-open{overflow:hidden}
   box-shadow: none;
 }
 
+.sell-promo{
+  border: 1px solid #f2c094;
+  background: #fff7ed;
+  color: #9a3412;
+  padding: 12px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.sell-promo:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
 .sell-clear{
   border: 1px solid #e5e7eb;
   background: #fff;
@@ -288,12 +308,16 @@ body.preview-open{overflow:hidden}
 @media (max-width:640px){
   :root{ --sellBarH: 104px; }
   .sell-submit{ min-width: 120px; }
+  .sell-promo{ min-width: 114px; }
   .item{ padding-right: 58px; }
   .add-btn{ width: 40px; height: 40px; right: 10px; }
   .qty-unavailable{
     min-width: 94px;
     font-size:10px;
     padding:7px 8px;
+  }
+  .promo-form{
+    grid-template-columns:1fr;
   }
 }
 .cart-drawer{
@@ -386,6 +410,12 @@ body.preview-open{overflow:hidden}
   font-size: 18px;
   color: #111827;
 }
+#cartDiscountPrice{
+  margin-top:4px;
+  font-weight:800;
+  font-size:14px;
+  color:#9a3412;
+}
 .cart-actions{
   margin-top: 12px;
   display:flex;
@@ -405,6 +435,137 @@ body.preview-open{overflow:hidden}
 .cart-gift:disabled{
   opacity: .55;
   cursor: not-allowed;
+}
+
+.promo-modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(17,24,39,.45);
+  z-index:40;
+  padding:16px;
+}
+
+.promo-modal.open{
+  display:flex;
+}
+
+.promo-panel{
+  width:min(460px,96vw);
+  background:#fff;
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 20px 45px rgba(0,0,0,.22);
+}
+
+.promo-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+
+.promo-title{
+  font-weight:900;
+  color:#9a3412;
+}
+
+#promotionClose{
+  border:none;
+  background:#fff;
+  width:32px;
+  height:32px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:22px;
+  line-height:1;
+}
+
+.promo-form{
+  display:grid;
+  grid-template-columns: 1fr 130px auto;
+  gap:10px;
+  align-items:end;
+}
+
+.promo-field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.promo-label{
+  font-size:12px;
+  color:#6b7280;
+  font-weight:700;
+}
+
+.promo-input{
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:14px;
+}
+
+.promo-apply{
+  border:none;
+  border-radius:10px;
+  padding:10px 14px;
+  font-weight:900;
+  background:linear-gradient(135deg,#fb923c,#f97316);
+  color:#fff;
+  cursor:pointer;
+}
+
+.promo-list{
+  margin-top:12px;
+  border-top:1px solid #f3f4f6;
+  padding-top:10px;
+  max-height:220px;
+  overflow:auto;
+}
+
+.promo-empty{
+  font-size:13px;
+  color:#6b7280;
+}
+
+.promo-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:1px dashed #f1f1f1;
+}
+
+.promo-item-main{
+  min-width:0;
+}
+
+.promo-item-name{
+  font-size:13px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.promo-item-meta{
+  font-size:12px;
+  color:#6b7280;
+}
+
+.promo-item-remove{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#374151;
+  border-radius:999px;
+  padding:6px 10px;
+  cursor:pointer;
+  font-weight:800;
 }
 </style>
 </head>
@@ -441,6 +602,7 @@ body.preview-open{overflow:hidden}
     <div class="cart-footer">
       <div id="cartTotal"></div>
       <div id="cartTotalPrice"></div>
+      <div id="cartDiscountPrice"></div>
 
       <div class="cart-actions">
         <button id="giftSubmit" class="cart-gift" type="button">Gift</button>
@@ -459,9 +621,36 @@ body.preview-open{overflow:hidden}
       Sell
     </button>
 
+    <button id="promotionOpen" class="sell-promo" type="button" disabled>
+      Promotion
+    </button>
+
     <button id="clearCart" class="sell-clear" type="button" disabled>
       Clear
     </button>
+  </div>
+</div>
+
+<div id="promotionModal" class="promo-modal" aria-hidden="true">
+  <div class="promo-panel" role="dialog" aria-modal="true" aria-label="Promotion discount">
+    <div class="promo-header">
+      <div class="promo-title">Promotion Discount</div>
+      <button id="promotionClose" type="button" aria-label="Close promotion">×</button>
+    </div>
+
+    <div class="promo-form">
+      <div class="promo-field">
+        <label class="promo-label" for="promotionSkuSelect">Cart Product</label>
+        <select id="promotionSkuSelect" class="promo-input"></select>
+      </div>
+      <div class="promo-field">
+        <label class="promo-label" for="promotionAmountInput">Discount ($)</label>
+        <input id="promotionAmountInput" class="promo-input" type="number" min="0.01" step="0.01" placeholder="0.00">
+      </div>
+      <button id="promotionApply" class="promo-apply" type="button">Apply</button>
+    </div>
+
+    <div id="promotionList" class="promo-list"></div>
   </div>
 </div>
 </div>
@@ -492,6 +681,7 @@ const CATEGORY_ORDER = [
   "protein",
   "drinks",
   "gum",
+  "promotion",
 ];
 
 // 分类显示配置：先按标准分类映射；未知分类走备用图标池
@@ -503,7 +693,9 @@ const CATEGORY_META = {
   protein: { icon: "💪", label: "Barras de proteína" },
   drinks: { icon: "🥤", label: "Bebidas" },
   gum: { icon: "🍃", label: "Chicles" },
+  promotion: { icon: "🏷️", label: "Promociones" },
 };
+const PROMOTION_CATEGORY_KEYS = new Set(["promotion"]);
 const FALLBACK_CATEGORY_ICONS = ["🧺", "🍱", "🍿", "🍩", "🥨", "🧃", "🍓", "🥜", "🍫", "🧁"];
 const FALLBACK_CATEGORY_ICON_OVERRIDES = {
   // 示例："limited special": "🌟",
@@ -513,6 +705,10 @@ const fallbackCategoryIconUsage = new Map(FALLBACK_CATEGORY_ICONS.map(icon => [i
 
 function normalizeCategoryKey(v){
   return String(v || "").trim().toLowerCase();
+}
+
+function isPromotionCategory(category){
+  return PROMOTION_CATEGORY_KEYS.has(normalizeCategoryKey(category));
 }
 
 function pickFallbackCategoryIcon(category){
@@ -600,6 +796,15 @@ function isComingSoonBadgeText(text){
 
 function getBadgeMeta(product){
   const badgeText = String(product?.badge || "").trim();
+  if (isPromotionCategory(product?.category)){
+    return {
+      type: "promo",
+      text: badgeText || "Promotion",
+      icon: "🏷️",
+      unavailable: true,
+    };
+  }
+
   const stockStatus = String(product?.stock_status || "").toLowerCase();
   const isOutByStatus = stockStatus === "out_of_stock" || stockStatus === "non_orderable";
   const isOutByFlag = product?.orderable === false || product?.is_orderable === false;
@@ -630,23 +835,73 @@ function getBadgeMeta(product){
  * ========================= */
 const cart = {}; // { sku: qty }
 const productMetaBySku = new Map();
+const discountAmountBySku = new Map(); // sku -> discount amount ($)
 
 function getQty(sku){ return cart[sku] || 0; }
+
+function toWholeQty(v){
+  return Math.max(0, Math.floor(Number(v) || 0));
+}
+
+function roundMoney(v){
+  return Math.round((Number(v) || 0) * 100) / 100;
+}
+
+function roundPortionQty(v){
+  return Math.round((Number(v) || 0) * 10000) / 10000;
+}
+
+function getUnitPrice(sku){
+  const meta = productMetaBySku.get(String(sku));
+  const price = Number(meta?.sellPrice || 0);
+  return Number.isFinite(price) ? price : 0;
+}
+
+function getDiscountAmountTotal(){
+  let total = 0;
+  for (const amount of discountAmountBySku.values()){
+    total += roundMoney(amount);
+  }
+  return roundMoney(total);
+}
+
+function discountAmountToPortionQty(sku, amount){
+  const unitPrice = getUnitPrice(sku);
+  if (!(unitPrice > 0)) return 0;
+  return roundPortionQty(roundMoney(amount) / unitPrice);
+}
+
+function getDiscountPortionTotal(){
+  let total = 0;
+  for (const [sku, amount] of discountAmountBySku.entries()){
+    total += discountAmountToPortionQty(sku, amount);
+  }
+  return roundPortionQty(total);
+}
 
 function setQty(sku, qty){
   const meta = productMetaBySku.get(String(sku));
   if (meta && meta.orderable === false){
     delete cart[sku];
+    discountAmountBySku.delete(String(sku));
     updateUI();
     return;
   }
 
   const q = Math.max(0, Math.floor(Number(qty) || 0));
-  if (q === 0) delete cart[sku];
-  else cart[sku] = q;
+  if (q === 0){
+    delete cart[sku];
+    discountAmountBySku.delete(String(sku));
+  }else{
+    cart[sku] = q;
+  }
 
   updateUI();
   if (cartDrawer.classList.contains("open")) renderCartPreview();
+  if (promotionModal.classList.contains("open")){
+    refreshPromotionSkuOptions();
+    renderPromotionList();
+  }
 }
 
 function updateQtyControls(){
@@ -661,9 +916,10 @@ function updateQtyControls(){
       const reason = String(meta?.unavailableLabel || "Unavailable");
       const unavailableType = String(meta?.unavailableType || "").toLowerCase();
       const typeClass = unavailableType ? ` qty-unavailable-${unavailableType}` : "";
-      const text = unavailableType === "soon"
-        ? "COMING SOON"
-        : (unavailableType === "oos" ? "OUT OF STOCK" : "UNAVAILABLE");
+      let text = "UNAVAILABLE";
+      if (unavailableType === "soon") text = "COMING SOON";
+      else if (unavailableType === "oos") text = "OUT OF STOCK";
+      else if (unavailableType === "promo") text = "PROMOTION";
       container.innerHTML = `<span class="qty-unavailable${typeClass}" title="${escapeHtml(reason)}">${text}</span>`;
       return;
     }
@@ -704,6 +960,7 @@ document.addEventListener("click",(e)=>{
  * ========================= */
 const summaryTextEl = document.getElementById("sellSummaryText");
 const sellBtnEl = document.getElementById("sellSubmit");
+const promotionOpenBtnEl = document.getElementById("promotionOpen");
 const clearBtnEl = document.getElementById("clearCart");
 const giftBtnEl = document.getElementById("giftSubmit");
 
@@ -712,6 +969,14 @@ const cartClose = document.getElementById("cartClose");
 const cartItemsEl = document.getElementById("cartItems");
 const cartTotalEl = document.getElementById("cartTotal");
 const cartTotalPriceEl = document.getElementById("cartTotalPrice");
+const cartDiscountPriceEl = document.getElementById("cartDiscountPrice");
+
+const promotionModal = document.getElementById("promotionModal");
+const promotionCloseBtn = document.getElementById("promotionClose");
+const promotionApplyBtn = document.getElementById("promotionApply");
+const promotionSkuSelect = document.getElementById("promotionSkuSelect");
+const promotionAmountInput = document.getElementById("promotionAmountInput");
+const promotionListEl = document.getElementById("promotionList");
 let summaryOverrideText = "";
 let summaryOverrideTimer = null;
 
@@ -727,15 +992,158 @@ cartDrawer.addEventListener("click",(e)=>{
   if(e.target === cartDrawer) cartDrawer.classList.remove("open");
 });
 
+function getPromotionCandidates(){
+  return Object.keys(cart)
+    .map((sku)=>({ sku, qty: Number(cart[sku] || 0), meta: productMetaBySku.get(String(sku)) }))
+    .filter((item)=> item.qty > 0 && item.meta && item.meta.orderable !== false);
+}
+
+function refreshPromotionSkuOptions(){
+  const candidates = getPromotionCandidates();
+  const currentValue = String(promotionSkuSelect.value || "");
+  promotionSkuSelect.innerHTML = "";
+
+  for (const item of candidates){
+    const option = document.createElement("option");
+    option.value = item.sku;
+    option.textContent = `${item.meta.name || item.sku} (x${item.qty})`;
+    promotionSkuSelect.appendChild(option);
+  }
+
+  if (!candidates.length) return;
+  if (candidates.some((item)=> item.sku === currentValue)){
+    promotionSkuSelect.value = currentValue;
+  } else {
+    promotionSkuSelect.value = candidates[0].sku;
+  }
+}
+
+function renderPromotionList(){
+  const rows = [];
+  for (const [sku, discountAmount] of discountAmountBySku.entries()){
+    if (!cart[sku]) continue;
+    const meta = productMetaBySku.get(String(sku));
+    const name = meta?.name || sku;
+    const cartQty = toWholeQty(cart[sku]);
+    const amount = roundMoney(discountAmount);
+    const portionQty = discountAmountToPortionQty(sku, amount);
+    rows.push({ sku, name, cartQty, amount, portionQty });
+  }
+
+  if (!rows.length){
+    promotionListEl.innerHTML = `<div class="promo-empty">No discount added.</div>`;
+    return;
+  }
+
+  promotionListEl.innerHTML = rows.map((row)=>`
+    <div class="promo-item">
+      <div class="promo-item-main">
+        <div class="promo-item-name">${escapeHtml(row.name)}</div>
+        <div class="promo-item-meta">Cart qty: ${row.cartQty} · Discount: ${fmtPrice(row.amount)} (qty ${row.portionQty})</div>
+      </div>
+      <button class="promo-item-remove" type="button" data-remove-discount="${encodeURIComponent(row.sku)}">Remove</button>
+    </div>
+  `).join("");
+}
+
+function openPromotionModal(){
+  if (!getPromotionCandidates().length) return;
+  refreshPromotionSkuOptions();
+  renderPromotionList();
+  promotionAmountInput.value = "";
+  promotionModal.classList.add("open");
+  promotionModal.setAttribute("aria-hidden", "false");
+}
+
+function closePromotionModal(){
+  promotionModal.classList.remove("open");
+  promotionModal.setAttribute("aria-hidden", "true");
+}
+
+promotionOpenBtnEl.addEventListener("click", openPromotionModal);
+promotionCloseBtn.addEventListener("click", closePromotionModal);
+promotionModal.addEventListener("click", (e)=>{
+  if (e.target === promotionModal) closePromotionModal();
+});
+
+promotionApplyBtn.addEventListener("click", ()=>{
+  const sku = String(promotionSkuSelect.value || "").trim();
+  const cartQty = toWholeQty(cart[sku]);
+  if (!sku || cartQty <= 0){
+    setSummaryOverride("Select cart product first", 1800);
+    return;
+  }
+
+  const unitPrice = getUnitPrice(sku);
+  if (!(unitPrice > 0)){
+    setSummaryOverride("Invalid product price", 2000);
+    return;
+  }
+
+  const discountAmount = roundMoney(promotionAmountInput.value);
+  if (!(discountAmount > 0)){
+    setSummaryOverride("Enter discount amount", 1800);
+    return;
+  }
+  const maxAmount = roundMoney(unitPrice * cartQty);
+  if (discountAmount > maxAmount){
+    setSummaryOverride(`Discount exceeds max ${fmtPrice(maxAmount)} for this cart qty`, 2600);
+    return;
+  }
+
+  discountAmountBySku.set(sku, discountAmount);
+  promotionAmountInput.value = "";
+  renderPromotionList();
+  updateUI();
+  if (cartDrawer.classList.contains("open")) renderCartPreview();
+});
+
+promotionListEl.addEventListener("click", (e)=>{
+  const btn = e.target.closest("[data-remove-discount]");
+  if (!btn) return;
+  const sku = decodeURIComponent(String(btn.getAttribute("data-remove-discount") || "").trim());
+  if (!sku) return;
+  discountAmountBySku.delete(sku);
+  renderPromotionList();
+  updateUI();
+  if (cartDrawer.classList.contains("open")) renderCartPreview();
+});
+
 function updateUI(){
   for (const sku of Object.keys(cart)){
     const meta = productMetaBySku.get(String(sku));
-    if (meta && meta.orderable === false) delete cart[sku];
+    if (meta && meta.orderable === false){
+      delete cart[sku];
+      discountAmountBySku.delete(String(sku));
+    }
+  }
+
+  for (const sku of Array.from(discountAmountBySku.keys())){
+    const cartQty = toWholeQty(cart[sku]);
+    if (cartQty <= 0){
+      discountAmountBySku.delete(sku);
+      continue;
+    }
+    const unitPrice = getUnitPrice(sku);
+    const discountAmount = roundMoney(discountAmountBySku.get(sku));
+    if (!(unitPrice > 0) || !(discountAmount > 0)){
+      discountAmountBySku.delete(sku);
+      continue;
+    }
+    const maxAmount = roundMoney(unitPrice * cartQty);
+    if (discountAmount > maxAmount){
+      discountAmountBySku.set(sku, maxAmount);
+    }
   }
 
   updateQtyControls();
+  if (promotionModal.classList.contains("open")){
+    refreshPromotionSkuOptions();
+    renderPromotionList();
+  }
 
   const totalQty = Object.values(cart).reduce((a,b)=>a+b,0);
+  const discountAmountTotal = getDiscountAmountTotal();
   let defaultSummary = "No items selected";
 
   const hasUnorderableInCart = Object.keys(cart).some((sku)=>{
@@ -745,11 +1153,17 @@ function updateUI(){
 
   if(totalQty === 0 || hasUnorderableInCart){
     sellBtnEl.disabled = true;
+    promotionOpenBtnEl.disabled = true;
     clearBtnEl.disabled = true;
     if (giftBtnEl) giftBtnEl.disabled = true;
+    closePromotionModal();
   }else{
     defaultSummary = `${totalQty} item(s)`;
+    if (discountAmountTotal > 0){
+      defaultSummary += ` · Discount ${fmtPrice(discountAmountTotal)}`;
+    }
     sellBtnEl.disabled = false;
+    promotionOpenBtnEl.disabled = false;
     clearBtnEl.disabled = false;
     if (giftBtnEl) giftBtnEl.disabled = false;
   }
@@ -786,8 +1200,8 @@ function renderCartPreview(){
     if (!item) return;
 
     const imgEl = item.querySelector("img");
-    const priceText = item.querySelector(".item-price")?.textContent || "";
-    const unitPrice = parsePrice(priceText);
+    const meta = productMetaBySku.get(String(sku));
+    const unitPrice = Number(meta?.sellPrice || 0);
     totalPrice += unitPrice * qty;
 
     const wrapper = document.createElement("div");
@@ -800,12 +1214,19 @@ function renderCartPreview(){
   });
 
   cartTotalEl.textContent = `Total Items: ${totalQty}`;
-  cartTotalPriceEl.textContent = `Total Price: $${totalPrice.toFixed(2)}`;
+  cartTotalPriceEl.textContent = `Total Price: ${fmtPrice(totalPrice)}`;
+  const discountAmountTotal = getDiscountAmountTotal();
+  const discountPortions = getDiscountPortionTotal();
+  cartDiscountPriceEl.textContent = discountAmountTotal > 0
+    ? `Discount: -${fmtPrice(discountAmountTotal)} (qty ${discountPortions})`
+    : "";
 }
 
 /** Clear */
 clearBtnEl.addEventListener("click",()=>{
   for(const k of Object.keys(cart)) delete cart[k];
+  discountAmountBySku.clear();
+  closePromotionModal();
   updateUI();
   if (cartDrawer.classList.contains("open")) renderCartPreview();
 });
@@ -833,8 +1254,15 @@ sellBtnEl.addEventListener("click", async ()=>{
   if (!pin) return;
 
   const items = skus.map(sku => ({ sku, qty: cart[sku] }));
+  const discountItems = skus
+    .map((sku)=>({
+      sku,
+      qty: discountAmountToPortionQty(sku, discountAmountBySku.get(sku)),
+    }))
+    .filter((item)=> item.qty > 0);
 
   sellBtnEl.disabled = true;
+  promotionOpenBtnEl.disabled = true;
   clearBtnEl.disabled = true;
   setSummaryOverride("Submitting...");
 
@@ -847,11 +1275,33 @@ sellBtnEl.addEventListener("click", async ()=>{
       "X-Sell-Pin": pin
     });
 
+    let discountError = "";
+    if (discountItems.length){
+      try{
+        await postJson(apiUrl("api/losses/batch"), {
+          items: discountItems,
+          request_id: crypto.randomUUID(),
+          loss_type: "DISCOUNT",
+          note: "Promotion discount amount converted to qty"
+        }, {
+          "X-Sell-Pin": pin
+        });
+      }catch(err){
+        discountError = err?.message || "Discount write failed";
+      }
+    }
+
     for(const k of Object.keys(cart)) delete cart[k];
+    discountAmountBySku.clear();
+    closePromotionModal();
     updateUI();
     if (cartDrawer.classList.contains("open")) cartDrawer.classList.remove("open");
 
-    setSummaryOverride("Sold ✓", 1200);
+    if (discountError){
+      setSummaryOverride(`Sold, discount failed: ${discountError}`, 3200);
+    }else{
+      setSummaryOverride("Sold ✓", 1200);
+    }
   }catch(err){
     setSummaryOverride(err?.message || "Sell failed", 3000);
   }finally{
@@ -882,6 +1332,8 @@ giftBtnEl?.addEventListener("click", async ()=>{
     });
 
     for(const k of Object.keys(cart)) delete cart[k];
+    discountAmountBySku.clear();
+    closePromotionModal();
     updateUI();
     if (cartDrawer.classList.contains("open")) cartDrawer.classList.remove("open");
 
@@ -927,7 +1379,9 @@ preview.addEventListener('click', (event) => {
 });
 previewClose.addEventListener('click', closePreview);
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && preview.classList.contains('is-open')) closePreview();
+  if (event.key !== 'Escape') return;
+  if (preview.classList.contains('is-open')) closePreview();
+  if (promotionModal.classList.contains("open")) closePromotionModal();
 });
 
 /** =========================
@@ -1026,14 +1480,24 @@ function renderMenu(products){
 
       const imgUrl = String(p.image_url || "").trim();
       const orderableByFlag = p.orderable !== false && p.is_orderable !== false;
+      const orderableByCategory = !isPromotionCategory(p.category);
       const orderableByBadge = !(badge && badge.unavailable === true);
-      const orderable = orderableByFlag && orderableByBadge;
+      const orderable = orderableByFlag && orderableByBadge && orderableByCategory;
+      const unavailableType = !orderable && !orderableByCategory
+        ? "promo"
+        : (badge?.type || "");
+      const unavailableLabel = !orderable && !orderableByCategory
+        ? "Promotion display only"
+        : (badge?.text || (orderable ? "" : "Unavailable"));
 
       productMetaBySku.set(String(p.sku), {
         orderable,
         badge: badgeText,
-        unavailableType: badge?.type || "",
-        unavailableLabel: badge?.text || (orderable ? "" : "Unavailable"),
+        unavailableType,
+        unavailableLabel,
+        category: String(p.category || ""),
+        name: String(p.name || ""),
+        sellPrice: Number(p.sell_price || 0),
       });
 
       const item = document.createElement("div");
