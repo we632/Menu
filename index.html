@@ -83,6 +83,23 @@ body{
 .item.is-unorderable .item-badge{
   opacity:.55;
 }
+
+/* promotion 只禁止下单，不做灰化处理 */
+.item.is-unorderable.is-promo-display{
+  background:#fff7ed !important;
+  border:1px dashed #f2c094;
+}
+
+.item.is-unorderable.is-promo-display img{
+  filter:none;
+  opacity:1;
+}
+
+.item.is-unorderable.is-promo-display .item-name,
+.item.is-unorderable.is-promo-display .item-price,
+.item.is-unorderable.is-promo-display .item-badge{
+  opacity:1;
+}
 .item-badge{
   display:inline-flex;
   align-items:center;
@@ -1216,9 +1233,8 @@ function renderCartPreview(){
   cartTotalEl.textContent = `Total Items: ${totalQty}`;
   cartTotalPriceEl.textContent = `Total Price: ${fmtPrice(totalPrice)}`;
   const discountAmountTotal = getDiscountAmountTotal();
-  const discountPortions = getDiscountPortionTotal();
   cartDiscountPriceEl.textContent = discountAmountTotal > 0
-    ? `Discount: -${fmtPrice(discountAmountTotal)} (qty ${discountPortions})`
+    ? `Discount: -${fmtPrice(discountAmountTotal)}`
     : "";
 }
 
@@ -1501,7 +1517,10 @@ function renderMenu(products){
       });
 
       const item = document.createElement("div");
-      item.className = `item${orderable ? "" : " is-unorderable"}`;
+      const itemClasses = ["item"];
+      if (!orderable) itemClasses.push("is-unorderable");
+      if (!orderable && unavailableType === "promo") itemClasses.push("is-promo-display");
+      item.className = itemClasses.join(" ");
       item.setAttribute("data-sku", p.sku);
       item.setAttribute("data-orderable", orderable ? "true" : "false");
 
