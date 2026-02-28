@@ -1274,11 +1274,11 @@ sellBtnEl.addEventListener("click", async ()=>{
       const lossAmount = roundMoney(discountAmountBySku.get(sku));
       return {
         sku,
-        qty: lossAmount,
+        qty: toWholeQty(cart[sku]),
         loss_amount: lossAmount,
       };
     })
-    .filter((item)=> item.qty > 0);
+    .filter((item)=> item.loss_amount > 0);
 
   sellBtnEl.disabled = true;
   promotionOpenBtnEl.disabled = true;
