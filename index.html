@@ -70,18 +70,18 @@ body{
 }
 
 .item.is-unorderable img{
-  filter:grayscale(100%);
-  opacity:.45;
+  filter:none;
+  opacity:1;
 }
 
 .item.is-unorderable{
-  background:#f3f4f6 !important;
+  background:inherit;
 }
 
 .item.is-unorderable .item-name,
 .item.is-unorderable .item-price,
 .item.is-unorderable .item-badge{
-  opacity:.55;
+  opacity:1;
 }
 
 /* promotion 只禁止下单，不做灰化处理 */
@@ -237,17 +237,20 @@ body.preview-open{overflow:hidden}
 :root{ --sellBarH: 92px; }
 
 .content{
-  padding-bottom: calc(clamp(16px,4vw,32px) + var(--sellBarH));
+  padding-bottom: calc(clamp(16px,4vw,32px) + var(--sellBarH) + env(safe-area-inset-bottom, 0px));
 }
 
 .sell-bar{
-  position: sticky;
+  position: fixed;
+  left: 0;
+  right: 0;
   bottom: 0;
   z-index: 9;
   width: 100%;
   background: rgba(255,255,255,.92);
   backdrop-filter: blur(10px);
   border-top: 1px solid #eee;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .sell-bar-inner{
