@@ -1318,7 +1318,7 @@ sellBtnEl.addEventListener("click", async ()=>{
     if (discountError){
       setSummaryOverride(`Sold, discount failed: ${discountError}`, 3200);
     }else{
-      setSummaryOverride("Sold ✓", 1200);
+      setSummaryOverride("Sold ✓", 10000);
     }
   }catch(err){
     setSummaryOverride(err?.message || "Sell failed", 3000);
@@ -1359,7 +1359,7 @@ giftBtnEl?.addEventListener("click", async ()=>{
     updateUI();
     if (cartDrawer.classList.contains("open")) cartDrawer.classList.remove("open");
 
-    setSummaryOverride("Gift recorded ✓", 1200);
+    setSummaryOverride("Gift recorded ✓", 10000);
   }catch(err){
     setSummaryOverride(err?.message || "Gift failed", 3000);
   }finally{
