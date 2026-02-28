@@ -1274,7 +1274,6 @@ sellBtnEl.addEventListener("click", async ()=>{
       const lossAmount = roundMoney(discountAmountBySku.get(sku));
       return {
         sku,
-        qty: toWholeQty(cart[sku]),
         loss_amount: lossAmount,
       };
     })
