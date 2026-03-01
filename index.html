@@ -1260,9 +1260,18 @@ async function postJson(url, body, extraHeaders = {}){
   return data;
 }
 
+function askActionNote(actionLabel){
+  const value = prompt(`Enter note for ${actionLabel} (optional):`, "");
+  if (value === null) return null;
+  return String(value);
+}
+
 sellBtnEl.addEventListener("click", async ()=>{
   const skus = Object.keys(cart);
   if(!skus.length) return;
+
+  const note = askActionNote("sale");
+  if (note === null) return;
 
   // 如果你后端有 PIN 校验就保留；没有就删掉这 3 行
   const pin = prompt("Enter PIN to confirm sale:");
@@ -1288,7 +1297,7 @@ sellBtnEl.addEventListener("click", async ()=>{
     await postJson(apiUrl("api/sales/batch"), {
       items,
       request_id: crypto.randomUUID(),
-      note: ""
+      note
     }, {
       "X-Sell-Pin": pin
     });
@@ -1300,7 +1309,7 @@ sellBtnEl.addEventListener("click", async ()=>{
           items: discountItems,
           request_id: crypto.randomUUID(),
           loss_type: "DISCOUNT",
-          note: "Promotion discount amount"
+          note
         }, {
           "X-Sell-Pin": pin
         });
@@ -1331,6 +1340,9 @@ giftBtnEl?.addEventListener("click", async ()=>{
   const skus = Object.keys(cart);
   if(!skus.length) return;
 
+  const note = askActionNote("gift");
+  if (note === null) return;
+
   const pin = prompt("Enter PIN to confirm gift:");
   if (!pin) return;
 
@@ -1348,7 +1360,7 @@ giftBtnEl?.addEventListener("click", async ()=>{
       items,
       request_id: crypto.randomUUID(),
       loss_type: "GIFT",
-      note: "Gift loss amount included"
+      note
     }, {
       "X-Sell-Pin": pin
     });
