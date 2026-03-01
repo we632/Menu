@@ -419,6 +419,21 @@ body.preview-open{overflow:hidden}
   .qty-control,
   .qty-unavailable{ grid-area:actions; justify-self:end; }
 }
+
+@media (min-width:641px) and (max-width:900px) and (hover:none), (min-width:641px) and (max-width:900px) and (pointer:coarse){
+  .item{
+    grid-template-columns:72px 1fr auto;
+    grid-template-areas:
+      "thumb name actions"
+      "thumb price actions";
+    align-items:center;
+  }
+  .item a{ grid-area:thumb; }
+  .item-name{ grid-area:name; }
+  .item-price{ grid-area:price; justify-self:start; }
+  .qty-control,
+  .qty-unavailable{ grid-area:actions; justify-self:end; }
+}
 .cart-drawer{
   position:fixed;
   inset:0;
