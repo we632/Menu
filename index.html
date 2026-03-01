@@ -584,6 +584,113 @@ body.preview-open{overflow:hidden}
   cursor:pointer;
   font-weight:800;
 }
+
+.action-modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(17,24,39,.5);
+  z-index:50;
+  padding:16px;
+}
+
+.action-modal.open{
+  display:flex;
+}
+
+.action-panel{
+  width:min(420px,96vw);
+  background:#fff;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 20px 45px rgba(0,0,0,.25);
+}
+
+.action-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+.action-title{
+  font-weight:900;
+  color:#9a3412;
+}
+
+.action-close{
+  border:none;
+  background:#fff;
+  width:32px;
+  height:32px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:22px;
+  line-height:1;
+}
+
+.action-hint{
+  margin:0 0 12px;
+  font-size:13px;
+  color:#6b7280;
+}
+
+.action-form{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.action-textarea,
+.action-pin{
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:14px;
+  font-family:inherit;
+}
+
+.action-textarea{
+  min-height:88px;
+  resize:vertical;
+}
+
+.action-error{
+  min-height:18px;
+  margin:0;
+  font-size:12px;
+  color:#b91c1c;
+  font-weight:700;
+}
+
+.action-actions{
+  margin-top:4px;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.action-cancel,
+.action-confirm{
+  border:none;
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.action-cancel{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#374151;
+}
+
+.action-confirm{
+  color:#fff;
+  background:linear-gradient(135deg,#fb923c,#f97316);
+}
 </style>
 </head>
 <body>
@@ -668,6 +775,30 @@ body.preview-open{overflow:hidden}
     </div>
 
     <div id="promotionList" class="promo-list"></div>
+  </div>
+</div>
+
+<div id="actionModal" class="action-modal" aria-hidden="true">
+  <div class="action-panel" role="dialog" aria-modal="true" aria-label="Sale confirmation">
+    <div class="action-header">
+      <div id="actionTitle" class="action-title">Confirm Action</div>
+      <button id="actionClose" class="action-close" type="button" aria-label="Close action dialog">×</button>
+    </div>
+    <p class="action-hint">Please add optional note and enter PIN to continue.</p>
+    <form id="actionForm" class="action-form">
+      <label class="promo-label" for="actionNoteInput">Note (optional)</label>
+      <textarea id="actionNoteInput" class="action-textarea" placeholder="Add note..."></textarea>
+
+      <label class="promo-label" for="actionPinInput">PIN</label>
+      <input id="actionPinInput" class="action-pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Enter PIN">
+
+      <p id="actionError" class="action-error" aria-live="polite"></p>
+
+      <div class="action-actions">
+        <button id="actionCancel" class="action-cancel" type="button">Cancel</button>
+        <button id="actionConfirm" class="action-confirm" type="submit">Confirm</button>
+      </div>
+    </form>
   </div>
 </div>
 </div>
@@ -994,6 +1125,20 @@ const promotionApplyBtn = document.getElementById("promotionApply");
 const promotionSkuSelect = document.getElementById("promotionSkuSelect");
 const promotionAmountInput = document.getElementById("promotionAmountInput");
 const promotionListEl = document.getElementById("promotionList");
+
+const actionModal = document.getElementById("actionModal");
+const actionTitleEl = document.getElementById("actionTitle");
+const actionCloseBtn = document.getElementById("actionClose");
+const actionCancelBtn = document.getElementById("actionCancel");
+const actionForm = document.getElementById("actionForm");
+const actionHintEl = actionModal.querySelector(".action-hint");
+const actionNoteLabel = actionForm.querySelector(`label[for="actionNoteInput"]`);
+const actionNoteInput = document.getElementById("actionNoteInput");
+const actionPinInput = document.getElementById("actionPinInput");
+const actionConfirmBtn = document.getElementById("actionConfirm");
+const actionErrorEl = document.getElementById("actionError");
+let actionModalResolver = null;
+
 let summaryOverrideText = "";
 let summaryOverrideTimer = null;
 
@@ -1260,22 +1405,67 @@ async function postJson(url, body, extraHeaders = {}){
   return data;
 }
 
-function askActionNote(actionLabel){
-  const value = prompt(`Enter note for ${actionLabel} (optional):`, "");
-  if (value === null) return null;
-  return String(value);
+function closeActionModal(result = null){
+  actionModal.classList.remove("open");
+  actionModal.setAttribute("aria-hidden", "true");
+  actionForm.reset();
+  actionErrorEl.textContent = "";
+
+  const resolver = actionModalResolver;
+  actionModalResolver = null;
+  if (resolver) resolver(result);
 }
+
+function openActionModal({ title, confirmText, showNote = true, hintText = "Please add optional note and enter PIN to continue." }){
+  return new Promise((resolve)=>{
+    actionModalResolver = resolve;
+    actionTitleEl.textContent = title;
+    actionConfirmBtn.textContent = confirmText;
+    actionHintEl.textContent = hintText;
+    actionNoteLabel.style.display = showNote ? "" : "none";
+    actionNoteInput.style.display = showNote ? "" : "none";
+    actionNoteInput.value = "";
+    actionPinInput.value = "";
+    actionErrorEl.textContent = "";
+    actionModal.classList.add("open");
+    actionModal.setAttribute("aria-hidden", "false");
+    if (showNote) actionNoteInput.focus();
+    else actionPinInput.focus();
+  });
+}
+
+actionCloseBtn.addEventListener("click", ()=> closeActionModal(null));
+actionCancelBtn.addEventListener("click", ()=> closeActionModal(null));
+actionModal.addEventListener("click", (e)=>{
+  if (e.target === actionModal) closeActionModal(null);
+});
+
+actionForm.addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const note = String(actionNoteInput.value || "");
+  const pin = String(actionPinInput.value || "").trim();
+
+  if (!pin){
+    actionErrorEl.textContent = "PIN is required.";
+    actionPinInput.focus();
+    return;
+  }
+
+  closeActionModal({ note, pin });
+});
 
 sellBtnEl.addEventListener("click", async ()=>{
   const skus = Object.keys(cart);
   if(!skus.length) return;
 
-  const note = askActionNote("sale");
-  if (note === null) return;
+  const saleConfirm = await openActionModal({
+    title: "Confirm Sale",
+    confirmText: "Sell Now",
+    showNote: true
+  });
+  if (!saleConfirm) return;
 
-  // 如果你后端有 PIN 校验就保留；没有就删掉这 3 行
-  const pin = prompt("Enter PIN to confirm sale:");
-  if (!pin) return;
+  const { note, pin } = saleConfirm;
 
   const items = skus.map(sku => ({ sku, qty: cart[sku] }));
   const discountItems = skus
@@ -1308,8 +1498,7 @@ sellBtnEl.addEventListener("click", async ()=>{
         await postJson(apiUrl("api/losses/batch"), {
           items: discountItems,
           request_id: crypto.randomUUID(),
-          loss_type: "DISCOUNT",
-          note
+          loss_type: "DISCOUNT"
         }, {
           "X-Sell-Pin": pin
         });
@@ -1340,11 +1529,14 @@ giftBtnEl?.addEventListener("click", async ()=>{
   const skus = Object.keys(cart);
   if(!skus.length) return;
 
-  const note = askActionNote("gift");
-  if (note === null) return;
+  const giftConfirm = await openActionModal({
+    title: "Confirm Gift / Discount",
+    confirmText: "Submit Gift",
+    showNote: true
+  });
+  if (!giftConfirm) return;
 
-  const pin = prompt("Enter PIN to confirm gift:");
-  if (!pin) return;
+  const { note, pin } = giftConfirm;
 
   giftBtnEl.disabled = true;
   setSummaryOverride("Submitting gift...");
@@ -1414,7 +1606,14 @@ preview.addEventListener('click', (event) => {
 previewClose.addEventListener('click', closePreview);
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
-  if (preview.classList.contains('is-open')) closePreview();
+  if (preview.classList.contains('is-open')){
+    closePreview();
+    return;
+  }
+  if (actionModal.classList.contains("open")){
+    closeActionModal(null);
+    return;
+  }
   if (promotionModal.classList.contains("open")) closePromotionModal();
 });
 
