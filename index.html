@@ -1471,12 +1471,14 @@ sellBtnEl.addEventListener("click", async ()=>{
   const discountItems = skus
     .map((sku)=>{
       const lossAmount = roundMoney(discountAmountBySku.get(sku));
+      const discountQty = toWholeQty(cart[sku]);
       return {
         sku,
+        qty: discountQty,
         loss_amount: lossAmount,
       };
     })
-    .filter((item)=> item.loss_amount > 0);
+    .filter((item)=> item.qty >= 1 && item.loss_amount > 0);
 
   sellBtnEl.disabled = true;
   promotionOpenBtnEl.disabled = true;
