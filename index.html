@@ -1320,6 +1320,7 @@ let actionModalResolver = null;
 
 let summaryOverrideText = "";
 let summaryOverrideTimer = null;
+const MIN_SUMMARY_OVERRIDE_MS = 10000;
 
 /** 点 Cart 才打开 drawer */
 document.querySelector(".sell-summary").addEventListener("click",()=>{
@@ -1519,11 +1520,12 @@ function setSummaryOverride(text, durationMs = 0){
   }
   updateUI();
   if (durationMs > 0){
+    const effectiveDurationMs = Math.max(MIN_SUMMARY_OVERRIDE_MS, Number(durationMs) || 0);
     summaryOverrideTimer = setTimeout(()=>{
       summaryOverrideText = "";
       summaryOverrideTimer = null;
       updateUI();
-    }, durationMs);
+    }, effectiveDurationMs);
   }
 }
 
