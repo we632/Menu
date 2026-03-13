@@ -1591,8 +1591,60 @@ async function postJson(url, body, extraHeaders = {}){
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(()=> ({}));
-  if(!res.ok) throw new Error(data.detail || "Request failed");
+  if(!res.ok) throw new Error(formatApiErrorMessage(data, "Request failed"));
   return data;
+}
+
+function getProductDisplayName(sku){
+  const normalizedSku = String(sku || "").trim();
+  const meta = productMetaBySku.get(normalizedSku);
+  return String(meta?.name || normalizedSku);
+}
+
+function formatDailyLimitError(detail){
+  if (!detail || typeof detail !== "object") return "";
+
+  const soldOutSkus = Array.isArray(detail.sold_out_skus) ? detail.sold_out_skus : [];
+  const remainingBySku = detail.remaining && typeof detail.remaining === "object"
+    ? detail.remaining
+    : {};
+
+  if (!soldOutSkus.length) return "";
+
+  const itemMessages = soldOutSkus.map((sku)=>{
+    const name = getProductDisplayName(sku);
+    const remainingRaw = Number(remainingBySku[sku]);
+    const hasRemaining = Number.isFinite(remainingRaw);
+    if (hasRemaining && remainingRaw > 0){
+      return `${name} today only has ${remainingRaw} left`;
+    }
+    return `${name} is sold out today`;
+  });
+
+  return `Selected quantity exceeds today's daily limit: ${itemMessages.join("; ")}`;
+}
+
+function formatApiErrorMessage(data, fallback = "Request failed"){
+  const detail = data?.detail;
+
+  if (typeof detail === "string" && detail.trim()){
+    return detail.trim();
+  }
+
+  if (detail && typeof detail === "object"){
+    const dailyLimitMessage = formatDailyLimitError(detail);
+    if (dailyLimitMessage) return dailyLimitMessage;
+
+    if (typeof detail.detail === "string" && detail.detail.trim()){
+      return detail.detail.trim();
+    }
+  }
+
+  if (typeof data?.message === "string" && data.message.trim()){
+    return data.message.trim();
+  }
+
+  return fallback;
 }
 
 
