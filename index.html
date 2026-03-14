@@ -728,9 +728,21 @@ body.preview-open{overflow:hidden}
 
 .promo-form{
   display:grid;
-  grid-template-columns: 1fr 130px auto;
+  grid-template-columns:minmax(0,1fr) minmax(0,130px) auto;
   gap:10px;
   align-items:end;
+}
+
+.promo-form .promo-field{
+  min-width:0;
+}
+
+.promo-form .promo-input{
+  width:100%;
+}
+
+.promo-form .promo-apply{
+  white-space:nowrap;
 }
 
 .savings-form{
@@ -1018,7 +1030,6 @@ body.preview-open{overflow:hidden}
       <div id="cartTotalPrice"></div>
       <div id="cartDiscountPrice"></div>
       <div id="cartSavingsDeduction"></div>
-      <div id="cartCashAmount"></div>
       <div id="cartSavingsCustomer"></div>
 
       <div class="cart-actions">
@@ -1529,7 +1540,6 @@ const cartTotalEl = document.getElementById("cartTotal");
 const cartTotalPriceEl = document.getElementById("cartTotalPrice");
 const cartDiscountPriceEl = document.getElementById("cartDiscountPrice");
 const cartSavingsDeductionEl = document.getElementById("cartSavingsDeduction");
-const cartCashAmountEl = document.getElementById("cartCashAmount");
 const cartSavingsCustomerEl = document.getElementById("cartSavingsCustomer");
 
 cartItemsEl?.addEventListener("click", (e)=>{
@@ -1989,10 +1999,8 @@ function renderCartPreview(){
 
   const preview = checkoutState.cartPreview || {};
   const previewSavings = roundMoney(preview?.savings_deduction_amount);
-  const previewCash = roundMoney(preview?.cash_amount);
   const previewCustomer = String(preview?.savings_customer_name || "").trim();
   cartSavingsDeductionEl.textContent = previewSavings > 0 ? `Savings Deduction: ${fmtPrice(previewSavings)}` : "";
-  cartCashAmountEl.textContent = previewCash > 0 ? `Cash Amount: ${fmtPrice(previewCash)}` : "";
   cartSavingsCustomerEl.textContent = previewCustomer ? `Savings Customer: ${previewCustomer}` : "";
 }
 
