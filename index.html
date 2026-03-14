@@ -1991,8 +1991,9 @@ function renderCartPreview(){
   });
 
   cartTotalEl.textContent = `Total Items: ${totalQty}`;
-  cartTotalPriceEl.textContent = `Total Price: ${fmtPrice(totalPrice)}`;
   const discountAmountTotal = getDiscountAmountTotal();
+  const netTotalPrice = roundMoney(Math.max(0, totalPrice - discountAmountTotal));
+  cartTotalPriceEl.textContent = `Total Price: ${fmtPrice(netTotalPrice)}`;
   cartDiscountPriceEl.textContent = discountAmountTotal > 0
     ? `Discount: -${fmtPrice(discountAmountTotal)}`
     : "";
