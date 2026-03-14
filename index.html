@@ -1437,8 +1437,8 @@ document.querySelector(".sell-summary").addEventListener("click",()=>{
 
 cartClose.addEventListener("click",()=> cartDrawer.classList.remove("open"));
 cartDrawer.addEventListener("click",(e)=>{
-  // 仅允许通过关闭按钮退出，不响应遮罩点击
-  if (e.target === cartDrawer) return;
+  // Cart Preview 允许点击遮罩关闭
+  if (e.target === cartDrawer) cartDrawer.classList.remove("open");
 });
 
 function getPromotionCandidates(){
