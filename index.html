@@ -1106,6 +1106,15 @@ function isComingSoonBadgeText(text){
   return /coming\s*up\s*soon|coming\s*soon/.test(badgeText);
 }
 
+function parseDailyRemaining(value){
+  if (value === null || value === undefined) return Number.POSITIVE_INFINITY;
+  if (typeof value === "string" && value.trim() === "") return Number.POSITIVE_INFINITY;
+
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return Number.POSITIVE_INFINITY;
+  return n;
+}
+
 function getBadgeMeta(product){
   const badgeText = String(product?.badge || "").trim();
   if (isPromotionCategory(product?.category)){
@@ -1118,10 +1127,9 @@ function getBadgeMeta(product){
   }
 
   const stockStatus = String(product?.stock_status || "").toLowerCase();
-  const dailyRemainingRaw = Number(product?.daily_remaining);
-  const hasDailyRemaining = Number.isFinite(dailyRemainingRaw);
-  const dailyRemaining = hasDailyRemaining ? dailyRemainingRaw : Number.POSITIVE_INFINITY;
-  const isSoldOutToday = hasDailyRemaining && dailyRemaining <= 0;
+  const dailyRemaining = parseDailyRemaining(product?.daily_remaining);
+  const hasDailyLimit = Number.isFinite(dailyRemaining);
+  const isSoldOutToday = hasDailyLimit && dailyRemaining <= 0;
   const isOutByStatus = stockStatus === "out_of_stock" || stockStatus === "non_orderable" || stockStatus === "sold_out";
   const isOutByFlag = product?.orderable === false || product?.is_orderable === false;
   const isOutByText = isUnavailableBadgeText(badgeText);
