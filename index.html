@@ -780,6 +780,8 @@ body.preview-open{overflow:hidden}
 }
 
 .promo-input{
+  display:block;
+  width:100%;
   border:1px solid #e5e7eb;
   border-radius:10px;
   padding:10px 12px;
@@ -901,6 +903,32 @@ body.preview-open{overflow:hidden}
   display:flex;
   flex-direction:column;
   gap:10px;
+}
+
+.action-savings-card{
+  border:1px solid #f3e8d8;
+  background:#fffaf5;
+  border-radius:12px;
+  padding:10px;
+}
+
+.action-savings-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.action-savings-meta{
+  margin:6px 0 0;
+  color:#9a3412;
+  font-size:12px;
+  font-weight:700;
+}
+
+@media (max-width:640px){
+  .action-savings-grid{
+    grid-template-columns:1fr;
+  }
 }
 
 .action-textarea,
@@ -1158,16 +1186,22 @@ body.preview-open{overflow:hidden}
       <label id="actionCustomerNameLabel" class="promo-label" for="actionCustomerNameInput" style="display:none;">Customer Name</label>
       <input id="actionCustomerNameInput" class="action-pin" type="text" style="display:none;" autocomplete="off" placeholder="Enter customer name">
 
-      <div id="actionSavingsSection" style="display:none;">
+      <div id="actionSavingsSection" class="action-savings-card" style="display:none;">
         <label class="savings-checkbox" for="actionUseSavingsInput">
-          <input id="actionUseSavingsInput" type="checkbox"> Use Savings
+          <input id="actionUseSavingsInput" type="checkbox"> Use Savings (backend will settle if deduction exceeds order total)
         </label>
         <div id="actionSavingsFields" style="display:none; margin-top:8px;">
-          <label class="promo-label" for="actionSavingsAccountSelect">Savings Customer</label>
-          <select id="actionSavingsAccountSelect" class="promo-input"></select>
-
-          <label class="promo-label" for="actionSavingsDeductionInput">Savings Deduction Amount</label>
-          <input id="actionSavingsDeductionInput" class="promo-input" type="number" min="0" step="0.01" placeholder="0.00">
+          <div class="action-savings-grid">
+            <div class="promo-field">
+              <label class="promo-label" for="actionSavingsAccountSelect">Savings Customer</label>
+              <select id="actionSavingsAccountSelect" class="promo-input"></select>
+            </div>
+            <div class="promo-field">
+              <label class="promo-label" for="actionSavingsDeductionInput">Savings Deduction Amount</label>
+              <input id="actionSavingsDeductionInput" class="promo-input" type="number" min="0" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+          <p id="actionSavingsMeta" class="action-savings-meta"></p>
           <p id="actionSavingsWarning" class="savings-warning"></p>
         </div>
       </div>
@@ -1602,6 +1636,7 @@ const actionSavingsFields = document.getElementById("actionSavingsFields");
 const actionSavingsAccountSelect = document.getElementById("actionSavingsAccountSelect");
 const actionSavingsDeductionInput = document.getElementById("actionSavingsDeductionInput");
 const actionSavingsWarning = document.getElementById("actionSavingsWarning");
+const actionSavingsMeta = document.getElementById("actionSavingsMeta");
 const actionPinInput = document.getElementById("actionPinInput");
 const actionConfirmBtn = document.getElementById("actionConfirm");
 const actionErrorEl = document.getElementById("actionError");
@@ -2108,15 +2143,35 @@ function getCheckoutOrderTotal(){
   return roundMoney(subtotal - getDiscountAmountTotal());
 }
 
+function getSelectedSavingsAccount(){
+  return checkoutState.savingsAccounts.find((row)=> row.customer_name === actionSavingsAccountSelect.value) || null;
+}
+
+function syncActionSavingsAutoDeduction(){
+  if (!actionUseSavingsInput.checked) return;
+  const selected = getSelectedSavingsAccount();
+  const orderTotal = getCheckoutOrderTotal();
+  const deduction = roundMoney(Math.max(0, Math.min(orderTotal, selected?.balance || 0)));
+  actionSavingsDeductionInput.value = deduction.toFixed(2);
+  checkoutState.savingsDeductionAmount = deduction;
+  const remainingCash = roundMoney(Math.max(0, orderTotal - deduction));
+  actionSavingsMeta.textContent = `Order ${fmtPrice(orderTotal)} · Savings ${fmtPrice(deduction)} · Remaining Cash ${fmtPrice(remainingCash)}`;
+}
+
 function syncActionSavingsWarning(){
   if (!actionUseSavingsInput.checked){
     actionSavingsWarning.textContent = "";
+    actionSavingsMeta.textContent = "";
     return;
   }
   const deduction = roundMoney(actionSavingsDeductionInput.value);
-  const selected = checkoutState.savingsAccounts.find((row)=> row.customer_name === actionSavingsAccountSelect.value);
+  const selected = getSelectedSavingsAccount();
+  const orderTotal = getCheckoutOrderTotal();
+
   if (selected && deduction > selected.balance){
     actionSavingsWarning.textContent = `Warning: deduction exceeds account balance (${fmtPrice(selected.balance)}).`;
+  }else if (deduction > orderTotal){
+    actionSavingsWarning.textContent = `Info: deduction is above order total; backend will settle remaining amount.`;
   }else{
     actionSavingsWarning.textContent = "";
   }
@@ -2136,12 +2191,14 @@ function syncActionSavingsUI(){
     checkoutState.useSavings = false;
     checkoutState.savingsDeductionAmount = 0;
     actionSavingsWarning.textContent = "";
+    actionSavingsMeta.textContent = "";
     return;
   }
 
   renderSavingsAccountOptions(actionSavingsAccountSelect, checkoutState.savingsAccounts, checkoutState.selectedSavingsCustomerName);
   checkoutState.selectedSavingsCustomerName = String(actionSavingsAccountSelect.value || "");
   actionSavingsFields.style.display = actionUseSavingsInput.checked ? "" : "none";
+  if (actionUseSavingsInput.checked) syncActionSavingsAutoDeduction();
   syncActionSavingsWarning();
 }
 
@@ -2327,6 +2384,7 @@ function openActionModal({
     checkoutState.savingsDeductionAmount = 0;
     actionUseSavingsInput.checked = false;
     actionSavingsDeductionInput.value = "0";
+    actionSavingsMeta.textContent = "";
     actionCustomerNameInput.value = "";
     syncPayLaterCustomerField();
     actionPinInput.value = "";
@@ -2353,17 +2411,27 @@ actionUseSavingsInput?.addEventListener("change", ()=>{
   if (!checkoutState.useSavings){
     actionSavingsDeductionInput.value = "0";
     checkoutState.savingsDeductionAmount = 0;
+    actionSavingsMeta.textContent = "";
+  }else{
+    syncActionSavingsAutoDeduction();
   }
   syncActionSavingsWarning();
 });
 
 actionSavingsAccountSelect?.addEventListener("change", ()=>{
   checkoutState.selectedSavingsCustomerName = String(actionSavingsAccountSelect.value || "");
+  if (actionUseSavingsInput.checked) syncActionSavingsAutoDeduction();
   syncActionSavingsWarning();
 });
 
 actionSavingsDeductionInput?.addEventListener("input", ()=>{
   checkoutState.savingsDeductionAmount = roundMoney(actionSavingsDeductionInput.value);
+  if (actionUseSavingsInput.checked){
+    const orderTotal = getCheckoutOrderTotal();
+    const entered = roundMoney(actionSavingsDeductionInput.value);
+    const remainingCash = roundMoney(Math.max(0, orderTotal - entered));
+    actionSavingsMeta.textContent = `Order ${fmtPrice(orderTotal)} · Savings ${fmtPrice(entered)} · Remaining Cash ${fmtPrice(remainingCash)}`;
+  }
   syncActionSavingsWarning();
 });
 
@@ -2375,8 +2443,8 @@ actionForm.addEventListener("submit", (e)=>{
   const customerName = String(actionCustomerNameInput.value || "").trim();
   const useSavings = Boolean(actionUseSavingsInput.checked);
   const savingsCustomerName = String(actionSavingsAccountSelect.value || "").trim();
+  const selectedSavings = getSelectedSavingsAccount();
   const savingsDeductionAmount = roundMoney(actionSavingsDeductionInput.value);
-  const orderTotal = getCheckoutOrderTotal();
 
   if (!paymentType){
     actionErrorEl.textContent = "Invalid payment type.";
@@ -2408,8 +2476,8 @@ actionForm.addEventListener("submit", (e)=>{
     return;
   }
 
-  if (useSavings && savingsDeductionAmount > orderTotal){
-    actionErrorEl.textContent = "Savings deduction cannot exceed order total.";
+  if (useSavings && selectedSavings && savingsDeductionAmount > selectedSavings.balance){
+    actionErrorEl.textContent = `Savings deduction cannot exceed account balance (${fmtPrice(selectedSavings.balance)}).`;
     actionSavingsDeductionInput.focus();
     return;
   }
