@@ -1057,8 +1057,6 @@ body.preview-open{overflow:hidden}
       <div id="cartTotal"></div>
       <div id="cartTotalPrice"></div>
       <div id="cartDiscountPrice"></div>
-      <div id="cartSavingsDeduction"></div>
-      <div id="cartSavingsCustomer"></div>
 
       <div class="cart-actions">
         <button id="giftSubmit" class="cart-gift" type="button">Gift</button>
@@ -1573,8 +1571,6 @@ const cartItemsEl = document.getElementById("cartItems");
 const cartTotalEl = document.getElementById("cartTotal");
 const cartTotalPriceEl = document.getElementById("cartTotalPrice");
 const cartDiscountPriceEl = document.getElementById("cartDiscountPrice");
-const cartSavingsDeductionEl = document.getElementById("cartSavingsDeduction");
-const cartSavingsCustomerEl = document.getElementById("cartSavingsCustomer");
 
 cartItemsEl?.addEventListener("click", (e)=>{
   const target = getEventTargetElement(e.target);
@@ -2033,11 +2029,6 @@ function renderCartPreview(){
     ? `Discount: -${fmtPrice(discountAmountTotal)}`
     : "";
 
-  const preview = checkoutState.cartPreview || {};
-  const previewSavings = roundMoney(preview?.savings_deduction_amount);
-  const previewCustomer = String(preview?.savings_customer_name || "").trim();
-  cartSavingsDeductionEl.textContent = previewSavings > 0 ? `Savings Deduction: ${fmtPrice(previewSavings)}` : "";
-  cartSavingsCustomerEl.textContent = previewCustomer ? `Savings Customer: ${previewCustomer}` : "";
 }
 
 /** Clear */
